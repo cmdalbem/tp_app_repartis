@@ -86,15 +86,14 @@ void readMessage(server *s) {
 
 void process(server *s) {
     while(1) {
-	// initialize the buffer and fill it	
-	readMessage(s);
-	// answer
-	writeMessage(s, "I've got your message");
+	    // initialize the buffer and fill it	
+    	readMessage(s);
+	    // answer
+    	writeMessage(s, "I've got your message");
     }
 }
 
-int main(int argc, char *argv[])
-{
+void serverMain() {
 	server s;
     int pid;
 
@@ -119,6 +118,13 @@ int main(int argc, char *argv[])
 	// close the door
 	close(s.newsockfd);
 	close(s.sockfd);
-	
+}
+
+int main(int argc, char *argv[])
+{
+    serverMain();
+
     return 0; 
 }
+
+

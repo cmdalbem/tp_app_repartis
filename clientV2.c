@@ -89,8 +89,7 @@ void readMessage(client *c, char* buffer) {
 	printf("%s\n", buffer);		
 }
 
-int main(int argc, char *argv[])
-{
+int clientMain() {
 	// Captain obvious likes to describe the declaration of the client
 	client c;
 	// buffer used for the communication
@@ -118,6 +117,11 @@ int main(int argc, char *argv[])
 	}
 	// close the door
 	closeClient(&c);
-		
+}
+
+int main(int argc, char *argv[])
+{
+    clientMain();
+
     return 0;
 }

@@ -95,9 +95,6 @@ int main(int argc, char *argv[])
 	client c;
 	// buffer used for the communication
 	char buffer[256];
-	// Set to 1 if you wanna stay connected to the server
-	int stayConnected = 1;
-	
 	
     // shout at the bad user
 	usage(argc, argv);
@@ -107,13 +104,9 @@ int main(int argc, char *argv[])
 	createSocket(&c, argv[1]);
 	
 	// it's gonna be a long talk
-	if (stayConnected) 
-		connectSocket(&c);		
+	connectSocket(&c);		
 		
 	while(1) {
-		if (! stayConnected) {
-			connectSocket(&c);
-		}			
 		printf("Please enter the message: ");
 		// initialize & read into the buffer
 		bzero(buffer,256);

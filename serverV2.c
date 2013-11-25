@@ -84,29 +84,37 @@ void readMessage(server *s) {
 		printf("Here is the message: %s\n",buffer);	
 }
 
+void process(server *s) {
+    while(1) {
+	// initialize the buffer and fill it	
+	readMessage(s);
+	// answer
+	writeMessage(s, "I've got your message");
+    }
+}
+
 int main(int argc, char *argv[])
 {
 	server s;
-	// Set to 1 if you wanna stay connected to the server
-	int stayConnected = 1;
+    int pid;
 
 	// shout at lazy user
  	usage(argc, argv);
 	
 	initialize(&s, argv);
-	// listen to the socket
-	if (stayConnected) {
-		connectServer(&s);
-	}
 	// while true listen. Good student		  	
 	while(1) {
-		if (! stayConnected) {
-			connectServer(&s);
-		}
-		// initialize the buffer and fill it	
-		readMessage(&s);
-		// answer
-		writeMessage(&s, "I've got your message");
+	    // listen to the socket
+    	connectServer(&s);
+        pid = fork();
+
+        if (pid == 0) {
+            close(s.sockfd);
+            process(&s);
+            exit(0);
+        } else {
+            close(s.newsockfd);
+        }
 	}
 	// close the door
 	close(s.newsockfd);

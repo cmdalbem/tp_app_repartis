@@ -1,8 +1,9 @@
 CC = g++
 
-CFLAGS = -Wall
-LIBS =
+CFLAGS = -Wall 
+LIBS = -ljson_linux-gcc-4.7_libmt 
 
+# Seulement ajoutez ici le nome du nouveaux module qui tu a crée ;)
 OBJS =  Server.o File.o
 
 BIN = 

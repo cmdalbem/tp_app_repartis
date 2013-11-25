@@ -93,7 +93,7 @@ void process(server *s) {
     }
 }
 
-void serverMain() {
+void serverMain(int argc, char *argv[]) {
 	server s;
     int pid;
 
@@ -122,7 +122,7 @@ void serverMain() {
 
 int main(int argc, char *argv[])
 {
-    serverMain();
+    serverMain(argc, argv);
 
     return 0; 
 }

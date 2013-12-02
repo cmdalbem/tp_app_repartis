@@ -10,8 +10,10 @@ using namespace std;
 
 
 class Server {
-
 public:
+	static const unsigned int nb_max_errors = 1; //K
+	static const unsigned int nb_max_clients = 10; //M
+	static const unsigned int nb_servers = 4; //N
 	Server(); 
 	~Server();
 

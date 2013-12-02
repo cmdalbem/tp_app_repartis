@@ -32,9 +32,17 @@ class FilesManager {
 		}
 		return res;
 	}
-	File *at(int id) {
-		return files.at(id);
-	}
+	void modify(int id, std::string title, std::string content) {
+		File *res;
+		try {
+			res = files.at(id);
+		} catch (const std::out_of_range& e) {
+			std::cout << "This file doesn't exist" << std::endl;
+		}
+		res->set_title(title);
+		res->set_content(content);
+		
+	}	
 };
 
 

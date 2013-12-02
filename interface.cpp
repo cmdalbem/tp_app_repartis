@@ -39,6 +39,13 @@ int main(void) {
 			std::cout << manager.show(idRetrieved) << std::endl;
 			break;
 		case 4:
+			std::cout << "id of the file: " << std::endl;
+			std::cin >> idRetrieved;
+			std::cout << "title of the file: " << std::endl;
+			std::cin >> title;
+			std::cout << "content of the file: " << std::endl;
+			std::cin >> content;
+			manager.modify(idRetrieved, title, content);
 			break;
 		case 5: 
 			manager.showAll();

@@ -1,5 +1,5 @@
 #include "File.h"
-
+/*
 void File::to_JSON(std::string& output_data) 
 {
 	Json::Value data;
@@ -22,6 +22,7 @@ int File::parse_JSON(std::string json_data)
 	this->content = data["content"].asString();
 	return 0;
 }
+*/
 std::string File::show() {
 	std::string res;
 	res = "id = " + std::to_string(this->id) + ", title = " + this->title + ", content= " + this->content;

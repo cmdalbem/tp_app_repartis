@@ -1,5 +1,5 @@
 CC = g++
-FLAGS = -Wall -Wextra -std=c++11
+FLAGS = -Wall -Wextra 
 LIBS = -ljson_linux-gcc-4.7_libmt 
 
 # Seulement ajoutez ici le nom du nouveaux module qui tu a crée ;)

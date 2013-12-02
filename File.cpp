@@ -1,4 +1,5 @@
 #include "File.h"
+#include <sstream>
 /*
 void File::to_JSON(std::string& output_data) 
 {
@@ -25,6 +26,9 @@ int File::parse_JSON(std::string json_data)
 */
 std::string File::show() {
 	std::string res;
-	res = "id = " + std::to_string(this->id) + ", title = " + this->title + ", content= " + this->content;
+	std::stringstream ss;
+	ss << this->id;
+	std::string idf = ss.str();
+	res = "id = " + idf + ", title = " + this->title + ", content= " + this->content;
 	return res;
 }

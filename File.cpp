@@ -1,16 +1,29 @@
 #include "File.h"
 
-int main(void) 
+void File::to_JSON(std::string& output_data) 
 {
-	File *f = new File(1,"titre","contenu");
-	std::cout << "Test Fichier sans JSON" << std::endl;
-	std::cout << "( id= " <<f->get_id() << ", title= " << f->get_title() << ", content= "<< f->get_content() << " )"<<std::endl;
-	std::cout << "Test Fichier avec JSON" << std::endl;
-	File *f2 = new File(2, "titre2","contenu2");
-	std::string data;
-	f2->to_JSON(data);
-	File *f3 = new File();
-	f3->parse_JSON(data);
-	
-	std::cout << "( id= " <<f3->get_id() << ", title= " << f3->get_title() << ", content= "<< f3->get_content() << " )"<<std::endl;
+	Json::Value data;
+	data["id"] = this->id;
+	data["title"] = this->title;
+	data["content"] = this->content;
+	Json::StyledWriter writer;
+	output_data = writer.write(data);
+}
+int File::parse_JSON(std::string json_data)
+{
+	Json::Reader reader;
+	Json::Value data;
+	bool parsingSuccessful = reader.parse(json_data, data);
+	if (!parsingSuccessful) {
+		return 1;
+	}
+	this->id = data["id"].asInt();
+	this->title = data["title"].asString();
+	this->content = data["content"].asString();
+	return 0;
+}
+std::string File::show() {
+	std::string res;
+	res = "id = " + std::to_string(this->id) + ", title = " + this->title + ", content= " + this->content;
+	return res;
 }

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string>
 
-#include "Server.hpp"
+#include "Server.h"
 
 Server::Server() {
 	// do the complex server/client initializations here 

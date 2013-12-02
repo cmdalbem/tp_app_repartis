@@ -1,8 +1,8 @@
-#if not defined FICHIER_H
-#define FICHIER_H
-#include <iostream>
+#if not defined FILE_H
+#define FILE_H
 #include <jsoncpp/json.h>
-
+#include <string>
+#include <iostream>
 class File {
 	int id;
 	std::string title;
@@ -17,32 +17,14 @@ class File {
 		this->title = title;
 		this->content = content;
 	}	
+	/* debug */
+	std::string show();
+
 	/*
-	 * Handling JSON
+	 * Handling JSON if needed
 	 */
-	void to_JSON(std::string& output_data) 
-	{
-		Json::Value data;
-		data["id"] = this->id;
-		data["title"] = this->title;
-		data["content"] = this->content;
-		Json::StyledWriter writer;
-		output_data = writer.write(data);
-	}
-	
-	int parse_JSON(std::string json_data)
-	{
-		Json::Reader reader;
-		Json::Value data;
-		bool parsingSuccessful = reader.parse(json_data, data);
-		if (!parsingSuccessful) {
-			return 1;
-		}
-		this->id = data["id"].asInt();
-		this->title = data["title"].asString();
-		this->content = data["content"].asString();
-		return 0;
-	}
+	void to_JSON(std::string& output_data);
+	int parse_JSON(std::string json_data);
 
 	/* 
 	 * Getters and setters

@@ -1,20 +1,18 @@
 CC = g++
-
-CFLAGS = -Wall 
+FLAGS = -Wall -Wextra -std=c++11
 LIBS = -ljson_linux-gcc-4.7_libmt 
 
-# Seulement ajoutez ici le nome du nouveaux module qui tu a crée ;)
-OBJS =  Server.o File.o
+# Seulement ajoutez ici le nom du nouveaux module qui tu a crée ;)
+OBJS = File.o test.o 
 
-BIN = 
+BIN = res
 
 %.o: %.cpp %.h
 		$(CC) $(FLAGS) -c $< -o $@ $(FLAGS) $(LIBS) 
 
-
 all: $(OBJS) $(OBJLIB)
-#		$(CC) $(FLAGS) $^ -o $(BIN) $(FLAGS) $(LIBS) 
-		$(CC) $(FLAGS) $^ $(FLAGS) $(LIBS) 
+		$(CC) $(FLAGS) $^ -o $(BIN) $(FLAGS) $(LIBS) 
+		#$(CC) $(FLAGS) $^ $(FLAGS) $(LIBS) 
 
 
 clean:

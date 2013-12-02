@@ -3,46 +3,29 @@
 #include "File.h"
 #include <stdexcept>
 #include <map>
+
+using namespace std;
+
+
 class FilesManager {
-	std::map<int,File *> files;
+
 	public:
-	FilesManager() {}
-	void add(File *file) {
-		files.insert(std::pair<int,File *>(file->get_id(), file));
-	}
-	/* DEBUG */
-	void showAll() {
-		std::map<int,File*>::iterator it;
-		for (it=files.begin(); it != files.end(); ++it) {
-			std::cout << "(" << it->first << ", " <<  it->second->show() << ") " << std::endl;
-		}
-	}	
-	void erase(int file_id) {
-		files.erase(file_id);
-	}
-	void erase(File *file) {
-		files.erase(file->get_id());
-	}
-	std::string show(int id) {
-		std::string res;
-		try {
-			res = files.at(id)->show();
-		} catch (const std::out_of_range& e) {
-			return "This file doesn't exist";
-		}
-		return res;
-	}
-	void modify(int id, std::string title, std::string content) {
-		File *res;
-		try {
-			res = files.at(id);
-		} catch (const std::out_of_range& e) {
-			std::cout << "This file doesn't exist" << std::endl;
-		}
-		res->set_title(title);
-		res->set_content(content);
+		FilesManager() {}
+		void add(File *file);
 		
-	}	
+		/* DEBUG */
+		void showAll();	
+		
+		void erase(int file_id);
+		void erase(File *file);
+		
+		File* read(int id);
+
+		void modify(int id, std::string title, std::string content);
+
+	private:
+		std::map<int,File *> files;
+
 };
 
 

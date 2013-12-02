@@ -4,6 +4,8 @@
 
 #include "Server.h"
 
+void connectToServer();
+
 void createFile();
 
 void deleteFile();

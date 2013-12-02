@@ -12,21 +12,24 @@ using namespace std;
 class Server {
 
 public:
-	Server(); 
+	Server(string ip); 
 	~Server();
+
+	// Public attributes
+	string ip;
 
 	// Network
 	void addServerConnection(string ip);
 
 	// Files
-	File newFile(int id, string title, string content);
+	File* newFile(string title, string content);
 	
 	void updateFile(int id, string title, string content);
 	
 	void deleteFile(File *f);
 	void deleteFile(int file_id);
 	
-	File readFile(int file_id);
+	File* readFile(int file_id);
 
 	void listFiles();
 
@@ -35,5 +38,7 @@ public:
 private:
 	vector<string> otherServers;
 	FilesManager manager;
+
+	int lastId; // has to be synchronized by everybody
 
 };

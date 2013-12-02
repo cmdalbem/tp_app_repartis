@@ -1,58 +1,52 @@
 #define INTERFACE_H
 #include <iostream>
 #include <string>
-#include <FilesManager.h>
+
+#include "interface.h"
+
+using namespace std;
+
+
+// Globals
+Server server;
+int lastId=0; //  has to be synchronized
+
 
 int main(void) {
 	int command;
-	FilesManager manager;
-	int id=0; //  has to be synchronized
-	int exit=0;
-	while (!exit) {
-		std::cout << "(1) to create a file\n"
-			"(2) to delete a file\n"
-			"(3) to read a file\n"
-			"(4) to modify a file\n"
-			"(5) show all files\n"
-			"(6) to exit\n";
-		std::cin >> command;
-		std::string title;
-		std::string content;
-		int idRetrieved;
+	
+	bool exit=false;
+	
+	while (not exit) {
+		cout << "(1) to create a file\n"
+				"(2) to delete a file\n"
+				"(3) to read a file\n"
+				"(4) to modify a file\n"
+				"(5) show all files\n"
+				"(6) to exit\n";
+		
+		cin >> command;
+		
 		switch(command) {
 		case 1:
-			std::cout << "title: " << std::endl;
-			std::cin >> title;
-			std::cout << "content: " << std::endl;
-			std::cin >> content;
-			manager.add(new File(id, title, content));
-			id++;
+			createFile();
+			lastId++;
 			break;
 		case 2:	
-			std::cout << "id of the file: " << std::endl;
-			std::cin >> idRetrieved;
-			manager.erase(idRetrieved);
+			deleteFile();
 			break;
 		case 3:
-			std::cout << "id of the file: " <<std::endl;
-			std::cin >> idRetrieved;
-			std::cout << manager.show(idRetrieved) << std::endl;
+			readFile();
 			break;
 		case 4:
-			std::cout << "id of the file: " << std::endl;
-			std::cin >> idRetrieved;
-			std::cout << "title of the file: " << std::endl;
-			std::cin >> title;
-			std::cout << "content of the file: " << std::endl;
-			std::cin >> content;
-			manager.modify(idRetrieved, title, content);
+			modifyFile();
 			break;
 		case 5: 
-			manager.showAll();
+			showFiles();
 			break;
-
 		case 6: 
-			exit=1;
+			// EXIT
+			exit = true;
 			break;
 		default:
 			break;
@@ -60,4 +54,53 @@ int main(void) {
 	}
 }
 
+void createFile()
+{
+	string title, content;
 
+	cout << "title: " << endl;
+	cin >> title;
+	cout << "content: " << endl;
+	cin >> content;
+	server.newFile(lastId, title, content);
+}
+
+void deleteFile()
+{
+	string title, content;
+	int id;
+
+	cout << "id of the file: " << endl;
+	cin >> id;
+	server.deleteFile(id);
+}
+
+void readFile()
+{
+	int id;
+
+	cout << "id of the file: " <<endl;
+	cin >> id;
+	
+	File f = server.readFile(id); 
+	cout << f.get_content() << endl;
+}
+
+void modifyFile()
+{
+	int id;
+	string title, content;
+		
+	cout << "id of the file: " << endl;
+	cin >> id;
+	cout << "title of the file: " << endl;
+	cin >> title;
+	cout << "content of the file: " << endl;
+	cin >> content;
+	server.updateFile(id, title, content);
+}
+
+void showFiles()
+{
+	server.listFiles();
+}

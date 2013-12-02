@@ -1,9 +1,8 @@
 CC = g++
-FLAGS = -Wall -Wextra -I ../File
+FLAGS = -Wall -Wextra -I ../File -I ../Server
 LIBS = 
 
-# Seulement ajoutez ici le nom du nouveaux module qui tu a crée ;)
-OBJS = interface.o ../File/File.o ../File/FilesManager.o
+OBJS = interface.o ../File/File.o ../File/FilesManager.o ../Server/Server.o
 
 BIN = res
 

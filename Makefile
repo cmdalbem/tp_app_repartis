@@ -1,20 +1,15 @@
 CC = g++
-FLAGS = -Wall -Wextra 
+FLAGS = -Wall -Wextra -I ../File
 LIBS = 
 
-# Seulement ajoutez ici le nom du nouveaux module qui tu a crée ;)
-OBJS = File.o interface.o 
-
-BIN = res
-
-%.o: %.cpp %.h
-		$(CC) $(FLAGS) -c $< -o $@ $(FLAGS) $(LIBS) 
-
-all: $(OBJS) $(OBJLIB)
-		$(CC) $(FLAGS) $^ -o $(BIN) $(FLAGS) $(LIBS) 
-		#$(CC) $(FLAGS) $^ $(FLAGS) $(LIBS) 
-
+all:
+		$(MAKE) -C File 
+		$(MAKE) -C Client
+		$(MAKE) -C Interface
+		$(MAKE) -C Server
 
 clean:
-		rm -f $(BIN)
-		rm -f *.o
+		$(MAKE) -C File clean 
+		$(MAKE) -C Client clean
+		$(MAKE) -C Interface clean
+		$(MAKE) -C Server clean

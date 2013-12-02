@@ -1,3 +1,0 @@
-cp jsoncpp-src-0.5.0/libs/linux-gcc-4.7/libjson_linux-gcc-4.7_libmt.so /usr/lib
-cp jsoncpp-src-0.5.0/include/json/* /usr/include/jsoncpp/
-use option -ljson_linux-gcc-4.7_libmt while compiling

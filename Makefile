@@ -1,6 +1,6 @@
 CC = g++
 FLAGS = -Wall -Wextra 
-LIBS = -ljson_linux-gcc-4.7_libmt 
+LIBS = 
 
 # Seulement ajoutez ici le nom du nouveaux module qui tu a crée ;)
 OBJS = File.o interface.o 

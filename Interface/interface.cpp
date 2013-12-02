@@ -8,29 +8,33 @@ using namespace std;
 
 
 // Globals
-Server server;
-int lastId=0; //  has to be synchronized
+Server *server = NULL;
 
 
 int main(void) {
 	int command;
 	
-	bool exit=false;
+	bool exit = false;
 	
 	while (not exit) {
+
+		// Connects to a server
+		while (server==NULL)
+			connectToServer();
+
+		// Server is connected, we can start playing with files
 		cout << "(1) to create a file\n"
 				"(2) to delete a file\n"
 				"(3) to read a file\n"
 				"(4) to modify a file\n"
 				"(5) show all files\n"
 				"(6) to exit\n";
-		
+
 		cin >> command;
-		
+
 		switch(command) {
 		case 1:
 			createFile();
-			lastId++;
 			break;
 		case 2:	
 			deleteFile();
@@ -49,9 +53,21 @@ int main(void) {
 			exit = true;
 			break;
 		default:
+			cout << "\"" << command << "\" is not a valid command, please try again." << endl;
 			break;
 		}	
 	}
+}
+
+void connectToServer()
+{
+	string ip;
+
+	cout << "Please enter the server IP: ";
+	cin >> ip;
+
+	// Connect to server
+	server = new Server(ip);
 }
 
 void createFile()
@@ -62,7 +78,8 @@ void createFile()
 	cin >> title;
 	cout << "content: " << endl;
 	cin >> content;
-	server.newFile(lastId, title, content);
+
+	server->newFile(title, content);
 }
 
 void deleteFile()
@@ -72,7 +89,8 @@ void deleteFile()
 
 	cout << "id of the file: " << endl;
 	cin >> id;
-	server.deleteFile(id);
+
+	server->deleteFile(id);
 }
 
 void readFile()
@@ -82,8 +100,9 @@ void readFile()
 	cout << "id of the file: " <<endl;
 	cin >> id;
 	
-	File f = server.readFile(id); 
-	cout << f.get_content() << endl;
+	File* f = server->readFile(id); 
+	if (f)
+		cout << f->get_content() << endl;
 }
 
 void modifyFile()
@@ -97,10 +116,10 @@ void modifyFile()
 	cin >> title;
 	cout << "content of the file: " << endl;
 	cin >> content;
-	server.updateFile(id, title, content);
+	server->updateFile(id, title, content);
 }
 
 void showFiles()
 {
-	server.listFiles();
+	server->listFiles();
 }

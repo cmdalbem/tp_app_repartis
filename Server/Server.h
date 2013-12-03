@@ -1,10 +1,10 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <iostream>
 #include <string>
 #include <vector>
 
 #include "File.h"
 #include "FilesManager.h"
+#include "Connector.h"
 
 using namespace std;
 
@@ -18,13 +18,10 @@ public:
 	Server(string ip); 
 	~Server();
 
-	// Public attributes
-	string ip;
+	// Public getters
+	getIP() { return ip; }
 
-	// Network
-	void addServerConnection(string ip);
-
-	// Files
+	// Files Management
 	File* newFile(string title, string content);
 	
 	void updateFile(int id, string title, string content);
@@ -39,8 +36,10 @@ public:
 
 
 private:
-	vector<string> otherServers;
 	FilesManager manager;
+	Connector connector;
+
+	string ip;
 
 	int lastId; // has to be synchronized by everybody
 

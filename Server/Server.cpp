@@ -13,16 +13,6 @@ Server::~Server() {
 
 }
 
-////////////////////////
-// Network Management //
-////////////////////////
-
-void Server::addServerConnection(string ip) {
-	// do the complex server/client initializations here
-	// ...
-}
-
-
 //////////////////////
 // Files Management //
 //////////////////////

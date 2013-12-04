@@ -75,8 +75,6 @@ void connectToServer()
 	unsigned int clientPort[2];
 	cin >> port;
 	clientPort[0] = 5020 + port[0] - '0';
-	cin >> port;
-	clientPort[1] = 5020 + port[0] - '0';
 
 	// Connect to server
 	string tmp[] = {"localhost", "localhost"};

@@ -43,14 +43,15 @@ void BasicServer::writeMessage(char * msg) {
 }
 
 void BasicServer::readMessage() {
-		char buffer[256];
-		int tmp;
-		bzero(buffer,256);
-		tmp = read(this->newsockfd, buffer, 255);
-		if (tmp < 0) error("ERROR reading from socket");
-		// read loudly
-		printf("Here is the message: %s\n",buffer);	
-	}
+	char buffer[256];
+	int tmp;
+	bzero(buffer,256);
+	tmp = read(this->newsockfd, buffer, 255);
+	if (tmp < 0) error("ERROR reading from socket");
+	// read loudly
+	printf("Here is the message: %s\n",buffer);	
+}
+
 void BasicServer::process() {
 	while(1) {
 		// initialize the buffer and fill it	
@@ -72,7 +73,7 @@ void *BasicServer::run() {
 			process();
 			exit(0);
 		} else {
-			close(this->newsockfd);
+	//		close(this->newsockfd);
 		}
 	}
 }
@@ -82,14 +83,19 @@ static void *BasicServer::runWrapper(void *context) {
 }
 
 void BasicServer::serverMain(int portNo) {
-
+	
 	initialize(portNo);
 	// while true listen. Good student		  	
 	pthread_t t;
-	pthread_create(&t, NULL, &BasicServer::runWrapper, this);
+	// make a copy of the object to keep the 
+	// field initialized
+	BasicServer tmp(*this);
+	pthread_create(&t, NULL, &BasicServer::runWrapper, &tmp);
+	// wait for the thread to finish
+	pthread_join(&t, NULL);
 	// close the door
-//	close(this->newsockfd);
-//	close(this->sockfd);
+	close(this->newsockfd);
+	close(this->sockfd);
 }
 
 

@@ -72,7 +72,11 @@ void *Client::run() {
 		printf("Please enter the message: ");
 		// initialize & read into the buffer
 		bzero(buffer,256);
-		fgets(buffer,255,stdin);
+		for(int i = 0; i < 255; i++) {
+			buffer[i] = 'a' + (i % 26);
+		}
+		buffer[255] = '\n';
+//		fgets(buffer,255,stdin);
 		// write to the other computer
 		this->writeMessage(buffer);
 		// wait for the answer
@@ -94,9 +98,10 @@ int Client::clientMain(string hostName,int portNo) {
 
 	pthread_t t;
 	pthread_create(&t, NULL, &Client::runWrapper, this);
-
+	pthread_join(&t, NULL);
+	
 	// close the door
-//	this->closeClient();
+	this->closeClient();
 	return 0;
 }
 

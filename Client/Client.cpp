@@ -69,6 +69,8 @@ void *Client::run() {
 	char buffer[256];
 
 	while(1) {
+		this->readMessage(buffer);
+		printf("%s\n", buffer);
 		printf("Please enter the message: ");
 		// initialize & read into the buffer
 		bzero(buffer,256);
@@ -97,7 +99,9 @@ int Client::clientMain(string hostName,int portNo) {
 	this->connectSocket();		
 
 	pthread_t t;
-	pthread_create(&t, NULL, &Client::runWrapper, this);
+	// copy the object for the thread
+	Client tmp(*this);
+	pthread_create(&t, NULL, &Client::runWrapper, &tmp);
 	pthread_join(&t, NULL);
 	
 	// close the door

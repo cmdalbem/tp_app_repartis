@@ -26,9 +26,11 @@ void BasicServer::initialize(int portNo) {
 	listen(this->sockfd, 5);
 	// wait until a client connects to the server
 	this->clilen = sizeof(this->cli_addr);
+	printf("%i, %i\n", this->sockfd, this->clilen);
 }
 	
 void BasicServer::connectServer() {
+	printf("%i, %i\n", this->sockfd, this->clilen);
 	this->newsockfd = accept(this->sockfd, 
 			(struct sockaddr *) &this->cli_addr, 
 			&this->clilen);
@@ -54,6 +56,7 @@ void BasicServer::readMessage() {
 
 void BasicServer::process() {
 	while(1) {
+		writeMessage((char *) "I've got your message");
 		// initialize the buffer and fill it	
 		readMessage();
 		// answer
@@ -90,6 +93,8 @@ void BasicServer::serverMain(int portNo) {
 	// make a copy of the object to keep the 
 	// field initialized
 	BasicServer tmp(*this);
+	printf("%i, %i\n", this->sockfd, this->clilen);
+	printf("%i, %i\n", tmp.sockfd, tmp.clilen);
 	pthread_create(&t, NULL, &BasicServer::runWrapper, &tmp);
 	// wait for the thread to finish
 	pthread_join(&t, NULL);
@@ -97,5 +102,3 @@ void BasicServer::serverMain(int portNo) {
 	close(this->newsockfd);
 	close(this->sockfd);
 }
-
-

@@ -10,6 +10,7 @@ Connector::Connector() {
 Connector::Connector(unsigned int nbMaxClients, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo) {
 	server.serverMain(portNo);		
 
+	printf("Step 1 ok.\n");
 	for (unsigned int i = 0; i < nbMaxClients-1; i++) {
 		clients.push_back(Client());
 	}	
@@ -17,7 +18,6 @@ Connector::Connector(unsigned int nbMaxClients, string listIpAdress[], unsigned 
 	bool allConnected = false;
 	while (! allConnected) {
 		//sleep(1000);
-
 		printf("Connexion in progress...\n");
 		allConnected = true;
 		for (unsigned int i = 0; i < nbMaxClients-1; i++) {

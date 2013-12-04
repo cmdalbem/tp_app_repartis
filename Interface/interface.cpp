@@ -21,7 +21,7 @@ int main(void) {
 		// Connects to a server
 		while (server==NULL)
 			connectToServer();
-
+		continue;
 		// Server is connected, we can start playing with files
 		cout << "(1) to create a file\n"
 				"(2) to delete a file\n"

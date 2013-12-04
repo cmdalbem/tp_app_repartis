@@ -18,17 +18,9 @@ void error(const char *msg)
 	exit(0);
 }
 
-class Client : public Subscriber {
-	// defines the file descriptor of the socket
-	int sockfd;
-	// defines the port number 
-	int portNo;
-	// internet address of the server
-	struct sockaddr_in serv_addr;
-	// pointer to the computer hosting the server
-	struct hostent *server;
-
-	public:
+//class Client : public Subscriber {
+class Client
+public:
 	void setPortNo(int portNo);
 
 	void createSocket(char *hostName);
@@ -42,6 +34,16 @@ class Client : public Subscriber {
 	void readMessage(char* buffer);
 
 	int clientMain(char *hostName, int portNo);
+
+private:
+	// defines the file descriptor of the socket
+	int sockfd;
+	// defines the port number 
+	int portNo;
+	// internet address of the server
+	struct sockaddr_in serv_addr;
+	// pointer to the computer hosting the server
+	struct hostent *server;
 };
 /*
 int main(int argc, char *argv[])

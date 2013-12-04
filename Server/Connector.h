@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <Client.h>
 
 using namespace std;
 
@@ -21,6 +22,7 @@ public:
 
 private:
 	vector<string> pairs;
+	vector<Client> clients;
 
 };
 

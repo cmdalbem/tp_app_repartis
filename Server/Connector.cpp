@@ -9,6 +9,10 @@ Connector::Connector() {
 
 Connector::Connector(unsigned int nbMaxClients, string listIpAdress[], unsigned int portNo) {
 
+	for (unsigned int i = 0; i < nbMaxClients; i++) {
+		clients.push_back(Client());
+		clients[i].clientMain(listIpAdress[i], portNo);	
+	}	
 }
 
 Connector::~Connector() {

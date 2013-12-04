@@ -1,5 +1,9 @@
 #include "Client.h"
 
+Client::Client(int portNo, char *hostName) {
+	
+}
+
 void Client::setPortNo(int portNo) {
 	this->portNo = portNo;
 }

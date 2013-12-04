@@ -2,7 +2,7 @@ CC = g++
 FLAGS = -Wall -Wextra -I ../File -I ../Server
 LIBS = 
 
-OBJS = interface.o ../File/File.o ../File/FilesManager.o ../Server/Server.o
+OBJS = interface.o ../File/File.o ../File/FilesManager.o ../Server/Server.o ../Server/Connector.o
 
 BIN = res
 

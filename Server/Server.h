@@ -25,7 +25,8 @@ public:
 	string getIP() { return ip; }
 
 	// Files Management
-	File* newFile(string title, string content);
+	//File* newFile(string title, string content);
+	void newFile(string title, string content);
 	
 	void updateFile(int id, string title, string content);
 	

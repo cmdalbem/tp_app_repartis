@@ -7,6 +7,10 @@ Connector::Connector() {
 
 }
 
+Connector::Connector(unsigned int nbMaxClients, string listIpAdress[], unsigned int portNo) {
+
+}
+
 Connector::~Connector() {
 
 }

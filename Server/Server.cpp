@@ -2,16 +2,16 @@
 #include <string>
 
 #include "Server.h"
+#include "Connector.h"
 
 Server::Server(string ip) {
 	this->ip = ip;
-	
-	// do the complex server/client initializations here 
 }	
 
 
-Server(string ip, string listIpAdress[], unsigned int portNo) :
-	Server(ip) {
+Server::Server(string ip, string listIpAdress[], unsigned int portNo) {
+	this->ip = ip;
+	// do the complex server/client initializations here 
 	Connector(nb_max_clients, listIpAdress, portNo);
 } 
 
@@ -23,7 +23,8 @@ Server::~Server() {
 // Files Management //
 //////////////////////
 
-File* Server::newFile(string title, string content) {
+//File* Server::newFile(string title, string content) {
+void Server::newFile(string title, string content) {
 	// Replicate it in the network
 	// ...
 

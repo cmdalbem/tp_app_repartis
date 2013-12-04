@@ -61,13 +61,26 @@ int main(void) {
 
 void connectToServer()
 {
-	string ip;
+	string ip, port;
 
-	cout << "Please enter the server IP: ";
-	cin >> ip;
+//	cout << "Please enter the server IP: ";
+//	cin >> ip;
+	ip = "localhost";
+
+	cout << "Please enter the port number: ";
+	cin >> port;
+	int portNo = 5020 + port[0] - '0';
+	cout << portNo << endl;
+	cout << "Please enter the clients port number: ";
+	unsigned int clientPort[2];
+	cin >> port;
+	clientPort[0] = 5020 + port[0] - '0';
+	cin >> port;
+	clientPort[1] = 5020 + port[0] - '0';
 
 	// Connect to server
-	server = new Server(ip);
+	string tmp[] = {"localhost", "localhost"};
+	server = new Server(ip, tmp, clientPort, portNo);
 }
 
 void createFile()

@@ -18,6 +18,8 @@
 //class Client : public Subscriber {
 class Client {
 public:
+	Client() : connected(false) {};
+
 	void setPortNo(int portNo);
 
 	void createSocket(std::string hostName);
@@ -30,6 +32,12 @@ public:
 
 	void readMessage(char* buffer);
 
+	void *run(); 
+
+	bool isConnected();
+
+	static void *runWrapper(void *context);
+
 	int clientMain(std::string hostName, int portNo);
 
 private:
@@ -41,10 +49,13 @@ private:
 	struct sockaddr_in serv_addr;
 	// pointer to the computer hosting the server
 	struct hostent *server;
+	// 
+	bool connected;
 
 	void error(const char * msg) {
 		perror(msg);
-		exit(0);
+		pthread_exit(NULL);
+//		exit(0);
 	}
 };
 /*

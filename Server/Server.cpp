@@ -9,10 +9,10 @@ Server::Server(string ip) {
 }	
 
 
-Server::Server(string ip, string listIpAdress[], unsigned int portNo) {
+Server::Server(string ip, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo) {
 	this->ip = ip;
 	// do the complex server/client initializations here 
-	Connector(nb_max_clients, listIpAdress, portNo);
+	Connector(nb_max_clients, listIpAdress, clientPortNo, portNo);
 } 
 
 Server::~Server() {	

@@ -32,8 +32,12 @@ void Client::createSocket(string hostName) {
 }	
 
 void Client::connectSocket() {
-	if (connect(this->sockfd,(struct sockaddr *) &this->serv_addr,sizeof(this->serv_addr)) < 0) 
+	if (connect(this->sockfd,(struct sockaddr *) &this->serv_addr,sizeof(this->serv_addr)) < 0) { 
+		connected = false;
 		error("ERROR connecting");
+	} else {
+		connected = true;
+	}
 }
 
 void Client::closeClient() {
@@ -56,17 +60,13 @@ void Client::readMessage(char *buffer) {
 	printf("%s\n", buffer);		
 }
 
-int Client::clientMain(string hostName,int portNo) {
-	// Captain obvious likes to describe the declaration of the client
+bool Client::isConnected() {
+	return connected; 
+}
+
+void *Client::run() {
 	// buffer used for the communication
 	char buffer[256];
-
-	// be confident that your user is not a troll
-	this->setPortNo(portNo);
-	this->createSocket(hostName);
-
-	// it's gonna be a long talk
-	this->connectSocket();		
 
 	while(1) {
 		printf("Please enter the message: ");
@@ -78,8 +78,25 @@ int Client::clientMain(string hostName,int portNo) {
 		// wait for the answer
 		this->readMessage(buffer);
 	}
+}
+
+static void *Client::runWrapper(void *context) {
+	return ((Client *) context)->run();
+}
+
+int Client::clientMain(string hostName,int portNo) {
+	// be confident that your user is not a troll
+	this->setPortNo(portNo);
+	this->createSocket(hostName);
+
+	// it's gonna be a long talk
+	this->connectSocket();		
+
+	pthread_t t;
+	pthread_create(&t, NULL, &Client::runWrapper, this);
+
 	// close the door
-	this->closeClient();
+//	this->closeClient();
 	return 0;
 }
 

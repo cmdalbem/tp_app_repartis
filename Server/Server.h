@@ -13,12 +13,12 @@ class Server {
 public:
 	// TODO transcript it into parameters
 	static const unsigned int nb_max_errors = 1; //K
-	static const unsigned int nb_max_clients = 10; //M
-	static const unsigned int nb_servers = 4; //N
+	static const unsigned int nb_max_clients = 2; //M
+	static const unsigned int nb_servers = 2; //N
 
 	Server(); 
 	Server(string ip); 
-	Server(string ip, string listIpAdress[], unsigned int portNo); 
+	Server(string ip, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo); 
 	~Server();
 
 	// Public getters

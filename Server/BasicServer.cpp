@@ -56,15 +56,12 @@ void BasicServer::process() {
 		// initialize the buffer and fill it	
 		readMessage();
 		// answer
-		writeMessage("I've got your message");
+		writeMessage((char *) "I've got your message");
 	}
 }
 
-void BasicServer::serverMain(int portNo) {
+void *BasicServer::run() {
 	int pid;
-
-	initialize(portNo);
-	// while true listen. Good student		  	
 	while(1) {
 		// listen to the socket
 		this->connectServer();
@@ -78,9 +75,21 @@ void BasicServer::serverMain(int portNo) {
 			close(this->newsockfd);
 		}
 	}
+}
+
+static void *BasicServer::runWrapper(void *context) {
+	return ((BasicServer *) context)->run();
+}
+
+void BasicServer::serverMain(int portNo) {
+
+	initialize(portNo);
+	// while true listen. Good student		  	
+	pthread_t t;
+	pthread_create(&t, NULL, &BasicServer::runWrapper, this);
 	// close the door
-	close(this->newsockfd);
-	close(this->sockfd);
+//	close(this->newsockfd);
+//	close(this->sockfd);
 }
 
 

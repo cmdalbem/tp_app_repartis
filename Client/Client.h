@@ -31,7 +31,7 @@ class Client : public Subscriber {
 	public:
 	void setPortNo(int portNo);
 
-	void createSocket(char * hostName);
+	void createSocket(char *hostName);
 
 	void connectSocket(); 
 
@@ -41,7 +41,7 @@ class Client : public Subscriber {
 
 	void readMessage(char* buffer);
 
-	int clientMain(int argc, char *argv[]);
+	int clientMain(char *hostName, int portNo);
 };
 /*
 int main(int argc, char *argv[])

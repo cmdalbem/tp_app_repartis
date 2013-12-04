@@ -56,15 +56,14 @@ void Client::readMessage(char* buffer) {
 	printf("%s\n", buffer);		
 }
 
-int Client::clientMain(int argc, char *argv[]) {
+int Client::clientMain(char *hostName,int portNo) {
 	// Captain obvious likes to describe the declaration of the client
 	// buffer used for the communication
 	char buffer[256];
-	// shout at the bad user
 
 	// be confident that your user is not a troll
-	this->setPortNo(atoi(argv[2]));
-	this->createSocket(argv[1]);
+	this->setPortNo(portNo);
+	this->createSocket(hostname);
 
 	// it's gonna be a long talk
 	this->connectSocket();		

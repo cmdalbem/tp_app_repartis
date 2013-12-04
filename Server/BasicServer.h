@@ -35,12 +35,12 @@ class BasicServer : public Publisher {
 
 	public:
 
-	void initialize(char *argv[]);
+	void initialize(int portNo);
 	void connectServer(); 
 	void writeMessage(char * msg);
 	void readMessage();
 	void process();
-	void serverMain(int argc, char *argv[]);
+	void serverMain(int portNo);
 };
 
 

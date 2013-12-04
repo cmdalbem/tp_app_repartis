@@ -1,6 +1,6 @@
 #include "BasicServer.h"
 
-void BasicServer::initialize(char *argv[]) {
+void BasicServer::initialize(int portNo) {
 	// define a new socket for internet domain & streaming
 	// 0 is a magic number
 	this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -10,7 +10,7 @@ void BasicServer::initialize(char *argv[]) {
 	// initialise the buffer. 'cause security
 	bzero((char *) &this->serv_addr, sizeof(this->serv_addr));
 	// get the port number. Trust the user for the input
-	this->portno = atoi(argv[1]);
+	this->portno = portNo;
 	// define the server adress
 	// address family : INET
 	this->serv_addr.sin_family = AF_INET;
@@ -60,13 +60,10 @@ void BasicServer::process() {
 	}
 }
 
-void BasicServer::serverMain(int argc, char *argv[]) {
+void BasicServer::serverMain(int portNo) {
 	int pid;
 
-	// shout at lazy user
-	usage(argc);
-
-	initialize(argv);
+	initialize(portNo);
 	// while true listen. Good student		  	
 	while(1) {
 		// listen to the socket

@@ -81,5 +81,6 @@ int Client::clientMain(int argc, char *argv[]) {
 	}
 	// close the door
 	this->closeClient();
+	return 0;
 }
 

@@ -3,7 +3,7 @@ FLAGS = -Wall -Wextra -I ../File
 LIBS = 
 
 # Seulement ajoutez ici le nom du nouveaux module qui tu a crée ;)
-OBJS = clientV2.o 
+OBJS = Client.o ../File/pubsub.o
 
 BIN = res
 

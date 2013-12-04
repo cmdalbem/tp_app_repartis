@@ -19,7 +19,7 @@ public:
 	~Server();
 
 	// Public getters
-	getIP() { return ip; }
+	string getIP() { return ip; }
 
 	// Files Management
 	File* newFile(string title, string content);

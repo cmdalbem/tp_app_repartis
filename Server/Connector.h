@@ -18,4 +18,4 @@ public:
 private:
 	vector<string> pairs;
 
-}
+};

@@ -3,7 +3,7 @@ FLAGS = -Wall -Wextra -I ../File
 LIBS = 
 
 # Seulement ajoutez ici le nom du nouveaux module qui tu a crée ;)
-OBJS = serverV2.o Server.o ../File/FilesManager.o ../File/File.o
+OBJS = BasicServer.o Server.o Connector.o ../File/pubsub.o ../File/FilesManager.o ../File/File.o
 
 BIN = res
 

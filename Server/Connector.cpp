@@ -16,7 +16,7 @@ void Connector::send(string ip, string msg) {
 
 }
 
-void Connector::broadcast(, string msg) {
+void Connector::broadcast(string msg) {
 	//...
 
 }

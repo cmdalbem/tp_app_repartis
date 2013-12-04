@@ -4,7 +4,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
 #include <unistd.h>
+#include <strings.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -12,28 +14,23 @@
 #include <netdb.h> 
 #include <pubsub.h>
 
-void error(const char *msg)
-{
-	perror(msg);
-	exit(0);
-}
 
 //class Client : public Subscriber {
-class Client
+class Client {
 public:
 	void setPortNo(int portNo);
 
-	void createSocket(char *hostName);
+	void createSocket(std::string hostName);
 
 	void connectSocket(); 
 
 	void closeClient();
 
-	void writeMessage(char *buffer);
+	void writeMessage(char* buffer);
 
 	void readMessage(char* buffer);
 
-	int clientMain(char *hostName, int portNo);
+	int clientMain(std::string hostName, int portNo);
 
 private:
 	// defines the file descriptor of the socket
@@ -44,6 +41,11 @@ private:
 	struct sockaddr_in serv_addr;
 	// pointer to the computer hosting the server
 	struct hostent *server;
+
+	void error(const char * msg) {
+		perror(msg);
+		exit(0);
+	}
 };
 /*
 int main(int argc, char *argv[])

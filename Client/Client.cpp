@@ -1,14 +1,10 @@
 #include "Client.h"
 
-Client::Client(int portNo, char *hostName) {
-	
-}
-
 void Client::setPortNo(int portNo) {
 	this->portNo = portNo;
 }
 
-void Client::createSocket(char * hostName) {
+void Client::createSocket(string hostName) {
 	// create a socket 	AF_INET for Internet Domain
 	// 					SOCK_STREAM for a stream
 	//					0 is a magic number
@@ -17,7 +13,7 @@ void Client::createSocket(char * hostName) {
 	if (this->sockfd == -1) 
 		error("ERROR opening socket");
 	// get the host. Once again, be confident in the input
-	this->server = gethostbyname(hostName);
+	this->server = gethostbyname(hostName.c_str());
 	// test the initialisation
 	if (this->server == NULL) {
 		fprintf(stderr,"ERROR, no such host\n");
@@ -44,14 +40,14 @@ void Client::closeClient() {
 	close(this->sockfd);
 }
 
-void Client::writeMessage(char *buffer) {
+void Client::writeMessage(char* buffer) {
 	int tmp;
-	tmp = write(this->sockfd, buffer, strlen(buffer));
+	tmp = write(this->sockfd, buffer, strlen(buffer)); 
 	if (tmp < 0) 
 		error("ERROR writing to socket");
 }
 
-void Client::readMessage(char* buffer) {
+void Client::readMessage(char *buffer) {
 	int tmp;
 	bzero(buffer,256);
 	tmp = read(this->sockfd, buffer, 255);
@@ -60,14 +56,14 @@ void Client::readMessage(char* buffer) {
 	printf("%s\n", buffer);		
 }
 
-int Client::clientMain(char *hostName,int portNo) {
+int Client::clientMain(string hostName,int portNo) {
 	// Captain obvious likes to describe the declaration of the client
 	// buffer used for the communication
 	char buffer[256];
 
 	// be confident that your user is not a troll
 	this->setPortNo(portNo);
-	this->createSocket(hostname);
+	this->createSocket(hostName);
 
 	// it's gonna be a long talk
 	this->connectSocket();		

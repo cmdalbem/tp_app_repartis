@@ -1,8 +1,8 @@
 CC = g++
-FLAGS = -Wall -Wextra -I ../File -I ../Server -I../Client
-LIBS = 
+FLAGS = -Wall -Wextra -I ../File -I ../Server -I../Client -fpermissive -g
+LIBS = -lpthread
 
-OBJS = interface.o ../File/File.o ../File/FilesManager.o ../Server/Server.o ../Server/Connector.o ../Client/Client.o
+OBJS = interface.o ../File/File.o ../File/FilesManager.o ../Server/Server.o ../Server/Connector.o ../Server/BasicServer.o ../Client/Client.o
 
 BIN = res
 
@@ -16,4 +16,5 @@ all: $(OBJS) $(OBJLIB)
 
 clean:
 		rm -f $(BIN)
+		rm -f $(OBJS)
 		rm -f *.o

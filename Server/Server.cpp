@@ -7,7 +7,13 @@ Server::Server(string ip) {
 	this->ip = ip;
 	
 	// do the complex server/client initializations here 
-}
+}	
+
+
+Server(string ip, string listIpAdress[], unsigned int portNo) :
+	Server(ip) {
+	Connector(nb_max_clients, listIpAdress, portNo);
+} 
 
 Server::~Server() {	
 

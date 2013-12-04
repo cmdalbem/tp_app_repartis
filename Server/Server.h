@@ -11,11 +11,14 @@ using namespace std;
 
 class Server {
 public:
+	// TODO transcript it into parameters
 	static const unsigned int nb_max_errors = 1; //K
 	static const unsigned int nb_max_clients = 10; //M
 	static const unsigned int nb_servers = 4; //N
+
 	Server(); 
 	Server(string ip); 
+	Server(string ip, string listIpAdress[], unsigned int portNo); 
 	~Server();
 
 	// Public getters

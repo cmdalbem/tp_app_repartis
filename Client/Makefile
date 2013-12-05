@@ -11,7 +11,7 @@ BIN = res
 		$(CC) $(FLAGS) -c $< -o $@ $(FLAGS) $(LIBS) 
 
 all: $(OBJS) $(OBJLIB)
-		$(CC) $(FLAGS) $^ -o $(BIN) $(FLAGS) $(LIBS) 
+#		$(CC) $(FLAGS) $^ -o $(BIN) $(FLAGS) $(LIBS) 
 		#$(CC) $(FLAGS) $^ $(FLAGS) $(LIBS) 
 
 

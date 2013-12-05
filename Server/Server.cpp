@@ -29,7 +29,8 @@ void Server::newFile(string title, string content) {
 
 	// Create new file
 	File* f = new File(lastId, title, content);
-	f->to_JSON(msg);
+	/* not using json, just concatanation of raw data */
+//	f->to_JSON(msg);
 
 	// Finds out who is alive
 	msg = "alive?";
@@ -61,7 +62,7 @@ void Server::updateFile(int file_id, string title, string content) {
 	// Waits until someone answers
 	string src;
 	File* f = new File(file_id, title, content);
-	f->to_JSON(msg);
+	//f->to_JSON(msg);
 	while (connector.receive(&src,&msg))
 		connector.send(src,msg);
 
@@ -112,7 +113,7 @@ File* Server::readFile(int file_id) {
 		connector.receive(&src,&msg);
 
 		file = new File();
-		file->parse_JSON(msg);
+		/*file->parse_JSON(msg);*/
 
 		return file;
 	}

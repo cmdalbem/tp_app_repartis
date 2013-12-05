@@ -28,9 +28,8 @@ public:
 	//File* newFile(string title, string content);
 	void newFile(string title, string content);
 	
-	void updateFile(int id, string title, string content);
+	void updateFile(int file_id, string title, string content);
 	
-	void deleteFile(File *f);
 	void deleteFile(int file_id);
 	
 	File* readFile(int file_id);

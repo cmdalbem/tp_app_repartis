@@ -25,35 +25,64 @@ Server::~Server() {
 
 //File* Server::newFile(string title, string content) {
 void Server::newFile(string title, string content) {
+	string msg;
+
+	// Create new file
+	File* f = new File(lastId, title, content);
+	f->to_JSON(msg);
+
+	// Finds out who is alive
+	msg = "alive?";
+	connector.broadcast(msg);
+
 	// Replicate it in the network
-	// ...
+	string src;
+	for (int i = 0; i < nb_max_errors+1; ++i) {
+		// Send the file for the first K+1 guys who answers
+		connector.receive(&src,&msg);
+		connector.send(src,msg);
+	}
 
 	// Add file locally
-	manager.add(new File(lastId, title, content));
+	manager.add(f);
 
 	// TEMPORARY
 	lastId++;
 
 }
 
-void Server::updateFile(int id, string title, string content) {
-	// ...
+void Server::updateFile(int file_id, string title, string content) {
+	string msg;
 
-	manager.modify(id, title, content);
+	// Asks who has the file
+	msg = "who_has " + file_id;
+	connector.broadcast(msg);
 
-}
+	// Waits until someone answers
+	string src;
+	File* f = new File(file_id, title, content);
+	f->to_JSON(msg);
+	while (connector.receive(&src,&msg))
+		connector.send(src,msg);
 
-void Server::deleteFile(File *f) {
-	// ...
-
-	manager.erase(f);
+	// Check if the file is available locally
+	File* file = manager.read(file_id);
+	if(file)
+		manager.modify(file_id, title, content);
 
 }
 
 void Server::deleteFile(int file_id) {
-	// ...
+	string msg;
+		
+	// Tells everyone that this file has to be deleted
+	msg = "del " + file_id;
+	connector.broadcast(msg);
 
-	manager.erase(file_id);
+	// Check if the file is available locally
+	File* file = manager.read(file_id);
+	if(file)
+		manager.erase(file_id);
 
 }
 	
@@ -82,7 +111,8 @@ File* Server::readFile(int file_id) {
 		// Receive the file
 		connector.receive(&src,&msg);
 
-		// TODO: Parse the file...
+		file = new File();
+		file->parse_JSON(msg);
 
 		return file;
 	}

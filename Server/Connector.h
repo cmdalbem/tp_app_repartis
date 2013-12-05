@@ -8,6 +8,8 @@
 
 using namespace std;
 
+#define DEFAULT_TIMEOUT 0.5
+
 class Connector {
 public:
 	Connector();
@@ -15,7 +17,8 @@ public:
 	~Connector();
 
 	void send(string ip, string msg);
-	void receive(string *src, string *msg);
+	// Blocking receive. Returns "false" if timeout.
+	bool receive(string *src, string *msg, float timeout=DEFAULT_TIMEOUT);
 	void broadcast(string msg);
 	
 	void addConnection(string ip);

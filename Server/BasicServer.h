@@ -28,7 +28,7 @@ public:
 
 private:
 	// defines two file descriptor and the port number
-	int sockfd, newsockfd, portno;
+	int sockfd, newsockfd, portNo;
 	// size of the client
 	socklen_t clilen;
 	// internet address of the server and the client
@@ -37,7 +37,7 @@ private:
 	void error(const char *msg)
 	{
 		perror(msg);
-		exit(1);
+		pthread_exit(NULL);
 	}
 
 	void usage(int argc) 

@@ -10,14 +10,14 @@ void BasicServer::initialize(int portNo) {
 	// initialise the buffer. 'cause security
 	bzero((char *) &this->serv_addr, sizeof(this->serv_addr));
 	// get the port number. Trust the user for the input
-	this->portno = portNo;
+	this->portNo = portNo;
 	// define the server adress
 	// address family : INET
 	this->serv_addr.sin_family = AF_INET;
 	// server -> the host is the machine
 	this->serv_addr.sin_addr.s_addr = INADDR_ANY;
 	// translate the port number in network byte order
-	this->serv_addr.sin_port = htons(this->portno);
+	this->serv_addr.sin_port = htons(this->portNo);
 	// bind the socket to the server
 	if (bind(this->sockfd, (struct sockaddr *) &this->serv_addr,
 				sizeof(this->serv_addr)) < 0) 
@@ -26,21 +26,20 @@ void BasicServer::initialize(int portNo) {
 	listen(this->sockfd, 5);
 	// wait until a client connects to the server
 	this->clilen = sizeof(this->cli_addr);
-	printf("%i, %i\n", this->sockfd, this->clilen);
 }
 	
 void BasicServer::connectServer() {
-	printf("%i, %i\n", this->sockfd, this->clilen);
 	this->newsockfd = accept(this->sockfd, 
 			(struct sockaddr *) &this->cli_addr, 
 			&this->clilen);
-	if (this->newsockfd < 0) 
-		error("ERROR on accept");
+	if (this->newsockfd < 0) { 
+		printf("Server ERROR on accept\n");
+	}
 }
 
 void BasicServer::writeMessage(char * msg) {
 	int tmp;
-	tmp = write(this->newsockfd, msg, 18);
+	tmp = write(this->newsockfd, msg, strlen(msg));
 	if (tmp < 0) error("ERROR writing to socket");
 }
 
@@ -51,12 +50,11 @@ void BasicServer::readMessage() {
 	tmp = read(this->newsockfd, buffer, 255);
 	if (tmp < 0) error("ERROR reading from socket");
 	// read loudly
-	printf("Here is the message: %s\n",buffer);	
+	printf("Server: %s\n",buffer);	
 }
 
 void BasicServer::process() {
 	while(1) {
-		writeMessage((char *) "I've got your message");
 		// initialize the buffer and fill it	
 		readMessage();
 		// answer
@@ -65,7 +63,9 @@ void BasicServer::process() {
 }
 
 void *BasicServer::run() {
+	initialize(this->portNo);
 	int pid;
+	// while true listen. Good student		  	
 	while(1) {
 		// listen to the socket
 		this->connectServer();
@@ -85,21 +85,16 @@ static void *BasicServer::runWrapper(void *context) {
 	return ((BasicServer *) context)->run();
 }
 
+BasicServer *threadedServer;
 void BasicServer::serverMain(int portNo) {
-	
-	initialize(portNo);
-	// while true listen. Good student		  	
+	this->portNo = portNo;
+
 	pthread_t t;
 	// make a copy of the object to keep the 
 	// field initialized
-	BasicServer tmp(*this);
-	printf("%i, %i\n", this->sockfd, this->clilen);
-	printf("%i, %i\n", tmp.sockfd, tmp.clilen);
-	pthread_create(&t, NULL, &BasicServer::runWrapper, &tmp);
-	// Crappy instruction : it will be a dead lock !
-	// wait for the thread to finish
-//	pthread_join(&t, NULL);
+	threadedServer = new BasicServer(*this);
+	pthread_create(&t, NULL, &BasicServer::runWrapper, threadedServer);
 	// close the door
-	close(this->newsockfd);
-	close(this->sockfd);
+	//close(this->newsockfd);
+	//close(this->sockfd);
 }

@@ -47,8 +47,10 @@ void Client::closeClient() {
 void Client::writeMessage(char* buffer) {
 	int tmp;
 	tmp = write(this->sockfd, buffer, strlen(buffer)); 
-	if (tmp < 0) 
-		error("ERROR writing to socket");
+	if (tmp < 0) { 
+		perror("ERROR writing to socket");
+		//error("ERROR writing to socket");
+	}
 }
 
 void Client::readMessage(char *buffer) {
@@ -57,7 +59,7 @@ void Client::readMessage(char *buffer) {
 	tmp = read(this->sockfd, buffer, 255);
 	if (tmp < 0) 
 		error("ERROR reading from socket");
-	printf("%s\n", buffer);		
+	printf("Client: %s\n", buffer);		
 }
 
 bool Client::isConnected() {
@@ -68,14 +70,12 @@ void *Client::run() {
 	// buffer used for the communication
 	char buffer[256];
 
+	// it's gonna be a long talk
 	while(1) {
-		this->readMessage(buffer);
-		printf("%s\n", buffer);
-		printf("Please enter the message: ");
 		// initialize & read into the buffer
 		bzero(buffer,256);
 		for(int i = 0; i < 255; i++) {
-			buffer[i] = 'a' + (i % 26);
+			buffer[i] = "Hello world!"[i];
 		}
 		buffer[255] = '\n';
 //		fgets(buffer,255,stdin);
@@ -83,6 +83,7 @@ void *Client::run() {
 		this->writeMessage(buffer);
 		// wait for the answer
 		this->readMessage(buffer);
+		sleep(10);
 	}
 }
 
@@ -90,22 +91,22 @@ static void *Client::runWrapper(void *context) {
 	return ((Client *) context)->run();
 }
 
+Client *threadedClient;
 int Client::clientMain(string hostName,int portNo) {
 	// be confident that your user is not a troll
 	this->setPortNo(portNo);
 	this->createSocket(hostName);
 
-	// it's gonna be a long talk
 	this->connectSocket();		
 
 	pthread_t t;
 	// copy the object for the thread
-	Client tmp(*this);
-	pthread_create(&t, NULL, &Client::runWrapper, &tmp);
-	pthread_join(&t, NULL);
+	threadedClient = new Client(*this);
+	pthread_create(&t, NULL, &Client::runWrapper, threadedClient);
+//	pthread_join(&t, NULL);
 	
 	// close the door
-	this->closeClient();
+	//this->closeClient();
 	return 0;
 }
 

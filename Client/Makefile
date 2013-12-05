@@ -1,6 +1,6 @@
 CC = g++
 FLAGS = -Wall -Wextra -I ../File
-LIBS = 
+LIBS = -pthread
 
 # Seulement ajoutez ici le nom du nouveaux module qui tu a crée ;)
 OBJS = Client.o ../File/pubsub.o

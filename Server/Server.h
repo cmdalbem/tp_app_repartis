@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 
+#include <jsoncpp/json.h>
 #include "File.h"
 #include "FilesManager.h"
 #include "Connector.h"

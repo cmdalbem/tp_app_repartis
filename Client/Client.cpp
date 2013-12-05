@@ -114,9 +114,27 @@ int Client::clientMain(string hostName,int portNo) {
 	pthread_create(&t, NULL, &Client::runWrapper, this->threadedClient);
 	// close the door
 	//this->closeClient();
+	return 0;
 }
 
-main()
-{
-	
+void Client::update(Publisher* who, Event& what) {
+	pthread_mutex_lock(&m);
+	bool emptyQueue = eventQueue.empty();
+	this->eventQueue.push_back(what);
+	if (emptyQueue) {
+		pthread_cond_signal(&c);
+	}
+	pthread_mutex_unlock(&m);
+}
+
+void Client::getEvent(Event& event) {
+	/* if the Client is getting an event, the Server must wait before he add an event */
+	pthread_mutex_lock(&m);
+	if ( eventQueue.empty() ) {
+		/* release the mutex m if the queue is empty*/
+		pthread_cond_wait(&c,&m);
+	}
+	event = eventQueue.front(); 
+	eventQueue.pop_front();
+	pthread_mutex_unlock(&m);
 }

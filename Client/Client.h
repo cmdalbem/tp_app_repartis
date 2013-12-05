@@ -15,11 +15,14 @@
 #include <pthread.h>
 
 
-//class Client : public Subscriber {
-class Client {
+class Client : public Subscriber {
 public:
 	Client() : connected(false), threadedClient(NULL) {};
-	Client(int id) : machineId(id), connected(false), threadedClient(NULL) {};
+	Client(int id) : connected(false), machineId(id), threadedClient(NULL) 
+	{
+		pthread_mutex_init(&m, NULL);
+		pthread_cond_init(&c, NULL);
+	};
 
 	void setPortNo(int portNo);
 
@@ -41,8 +44,14 @@ public:
 
 	int clientMain(std::string hostName, int portNo);
 	bool connected;
+	void update(Publisher* who, Event& what); 
+	void getEvent(Event& event); 
 
 private:
+	list<Event> eventQueue;
+	pthread_mutex_t m;
+	pthread_cond_t c;
+
 	int machineId;
 	// defines the file descriptor of the socket
 	int sockfd;

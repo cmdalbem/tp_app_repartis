@@ -48,6 +48,7 @@ void Client::writeMessage(char* buffer) {
 	int tmp;
 	tmp = write(this->sockfd, buffer, strlen(buffer)); 
 	if (tmp < 0) { 
+		// Do not exit
 		perror("ERROR writing to socket");
 		//error("ERROR writing to socket");
 	}
@@ -63,10 +64,16 @@ void Client::readMessage(char *buffer) {
 }
 
 bool Client::isConnected() {
-	return connected; 
+	if (threadedClient != NULL) {
+//		printf("%b\n", threadedClient->connected);
+		return threadedClient->connected; 
+	} else {
+		return false;
+	}
 }
 
 void *Client::run() {
+	this->connectSocket();		
 	// buffer used for the communication
 	char buffer[256];
 
@@ -83,7 +90,7 @@ void *Client::run() {
 		this->writeMessage(buffer);
 		// wait for the answer
 		this->readMessage(buffer);
-		sleep(10);
+		sleep(5);
 	}
 }
 
@@ -91,20 +98,15 @@ static void *Client::runWrapper(void *context) {
 	return ((Client *) context)->run();
 }
 
-Client *threadedClient;
 int Client::clientMain(string hostName,int portNo) {
 	// be confident that your user is not a troll
 	this->setPortNo(portNo);
 	this->createSocket(hostName);
 
-	this->connectSocket();		
-
-	pthread_t t;
 	// copy the object for the thread
-	threadedClient = new Client(*this);
-	pthread_create(&t, NULL, &Client::runWrapper, threadedClient);
-//	pthread_join(&t, NULL);
-	
+	this->threadedClient = new Client(*this);
+	pthread_t t;
+	pthread_create(&t, NULL, &Client::runWrapper, this->threadedClient);
 	// close the door
 	//this->closeClient();
 	return 0;

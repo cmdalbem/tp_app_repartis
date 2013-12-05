@@ -76,7 +76,7 @@ void *BasicServer::run() {
 			process();
 			exit(0);
 		} else {
-	//		close(this->newsockfd);
+			close(this->newsockfd);
 		}
 	}
 }
@@ -85,16 +85,17 @@ static void *BasicServer::runWrapper(void *context) {
 	return ((BasicServer *) context)->run();
 }
 
-BasicServer *threadedServer;
 void BasicServer::serverMain(int portNo) {
 	this->portNo = portNo;
 
-	pthread_t t;
 	// make a copy of the object to keep the 
 	// field initialized
+	pthread_t t;
+
 	threadedServer = new BasicServer(*this);
 	pthread_create(&t, NULL, &BasicServer::runWrapper, threadedServer);
 	// close the door
 	//close(this->newsockfd);
 	//close(this->sockfd);
+	return 0;
 }

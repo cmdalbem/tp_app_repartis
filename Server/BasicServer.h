@@ -16,7 +16,6 @@
 
 class BasicServer : public Publisher {
 public:
-
 	void initialize(int portNo);
 	void connectServer(); 
 	void writeMessage(char * msg);
@@ -33,6 +32,7 @@ private:
 	socklen_t clilen;
 	// internet address of the server and the client
 	struct sockaddr_in serv_addr, cli_addr;
+	BasicServer *threadedServer;
 
 	void error(const char *msg)
 	{

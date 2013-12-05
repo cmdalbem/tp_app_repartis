@@ -18,7 +18,7 @@
 //class Client : public Subscriber {
 class Client {
 public:
-	Client() : connected(false) {};
+	Client() : connected(false), threadedClient(NULL) {};
 
 	void setPortNo(int portNo);
 
@@ -39,6 +39,7 @@ public:
 	static void *runWrapper(void *context);
 
 	int clientMain(std::string hostName, int portNo);
+	bool connected;
 
 private:
 	// defines the file descriptor of the socket
@@ -49,25 +50,14 @@ private:
 	struct sockaddr_in serv_addr;
 	// pointer to the computer hosting the server
 	struct hostent *server;
+	Client *threadedClient;
 	// 
-	bool connected;
 
 	void error(const char * msg) {
+		connected = false;
 		perror(msg);
 		pthread_exit(NULL);
-//		exit(0);
 	}
 };
-/*
-int main(int argc, char *argv[])
-{
-	Client client;
-	client.clientMain(argc, argv);
-
-	return 0;
-}
-*/
-
 
 #endif
-

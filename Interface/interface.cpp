@@ -67,6 +67,9 @@ void connectToServer()
 //	cin >> ip;
 	ip = "localhost";
 
+	cout << "Please enter the id (<10): ";
+	cin >> port;
+	int machineId = port[0] - '0';
 	cout << "Please enter the port number: ";
 	cin >> port;
 	int portNo = 5020 + port[0] - '0';
@@ -83,7 +86,7 @@ void connectToServer()
 
 	// Connect to server
 	string tmp[] = {"localhost", "localhost"};
-	server = new Server(ip, tmp, clientPort, portNo);
+	server = new Server(machineId, ip, tmp, clientPort, portNo);
 }
 
 void createFile()

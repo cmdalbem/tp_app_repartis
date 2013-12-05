@@ -11,7 +11,7 @@ using namespace std;
 class Connector {
 public:
 	Connector();
-	Connector(unsigned int nbMaxClients, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo);
+	Connector(int machineId, unsigned int nbMaxClients, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo);
 	~Connector();
 
 	void send(string ip, string msg);

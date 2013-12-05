@@ -18,7 +18,7 @@ public:
 
 	Server(); 
 	Server(string ip); 
-	Server(string ip, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo); 
+	Server(int machineId, string ip, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo); 
 	~Server();
 
 	// Public getters

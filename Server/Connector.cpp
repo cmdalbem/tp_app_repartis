@@ -7,12 +7,12 @@ Connector::Connector() {
 
 }
 
-Connector::Connector(unsigned int nbMaxClients, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo) {
-	server.serverMain(portNo);		
+Connector::Connector(int machineId, unsigned int nbMaxClients, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo) {
+	server.serverMain(machineId, portNo);		
 	printf("Serveur launched\n");
 
 	for (unsigned int i = 0; i < nbMaxClients-1; i++) {
-		clients.push_back(Client());
+		clients.push_back(Client(machineId));
 	}	
 
 	bool allConnected = false;
@@ -28,7 +28,7 @@ Connector::Connector(unsigned int nbMaxClients, string listIpAdress[], unsigned 
 			}
 		}
 		// attemp to connect every 5 seconds
-		sleep(5);
+		//sleep(5);
 	}
 	printf("Client(s) connected\n");
 }
@@ -39,15 +39,16 @@ Connector::~Connector() {
 
 void Connector::send(string ip, string msg) {
 	//...
-
+	ip = ip;
+	msg = msg;
 }
 
 void Connector::broadcast(string msg) {
 	//...
-
+	msg = msg;
 }
 	
 void Connector::addConnection(string ip) {
 	//...
-	
+	ip = ip;	
 }

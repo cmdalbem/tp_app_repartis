@@ -84,7 +84,7 @@ void *Client::run() {
 		for(int i = 0; i < 255; i++) {
 			buffer[i] = "X says Hello world!"[i];
 		}
-		buffer[0] = portNo - 5020 + '0';
+		buffer[0] = machineId + '0';
 //		fgets(buffer,255,stdin);
 		// write to the other computer
 		this->writeMessage(buffer);
@@ -92,6 +92,8 @@ void *Client::run() {
 		this->readMessage(buffer);
 		sleep(10);
 	}
+
+	return 0;
 }
 
 static void *Client::runWrapper(void *context) {
@@ -109,6 +111,5 @@ int Client::clientMain(string hostName,int portNo) {
 	pthread_create(&t, NULL, &Client::runWrapper, this->threadedClient);
 	// close the door
 	//this->closeClient();
-	return 0;
 }
 

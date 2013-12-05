@@ -21,11 +21,12 @@ public:
 	void writeMessage(char * msg);
 	void readMessage();
 	void process();
-	void serverMain(int portNo);
+	void serverMain(int id, int portNo);
 	void *run(); 
 	static void *runWrapper(void *context);
 
 private:
+	int machineId;
 	// defines two file descriptor and the port number
 	int sockfd, newsockfd, portNo;
 	// size of the client

@@ -19,6 +19,7 @@
 class Client {
 public:
 	Client() : connected(false), threadedClient(NULL) {};
+	Client(int id) : connected(false), threadedClient(NULL), machineId(id)  {};
 
 	void setPortNo(int portNo);
 
@@ -42,6 +43,7 @@ public:
 	bool connected;
 
 private:
+	int machineId;
 	// defines the file descriptor of the socket
 	int sockfd;
 	// defines the port number 

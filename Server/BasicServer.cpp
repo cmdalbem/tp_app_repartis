@@ -62,7 +62,7 @@ void BasicServer::process() {
 		for(int i = 0; i < 255; i++) {
 			buffer[i] = "X says I've got your message"[i];
 		}
-		buffer[0] = portNo - 5020 + '0';
+		buffer[0] = machineId + '0';
 		writeMessage(buffer);
 	}
 }
@@ -90,8 +90,9 @@ static void *BasicServer::runWrapper(void *context) {
 	return ((BasicServer *) context)->run();
 }
 
-void BasicServer::serverMain(int portNo) {
+void BasicServer::serverMain(int machineId, int portNo) {
 	this->portNo = portNo;
+	this->machineId = machineId;
 
 	// make a copy of the object to keep the 
 	// field initialized
@@ -102,5 +103,4 @@ void BasicServer::serverMain(int portNo) {
 	// close the door
 	//close(this->newsockfd);
 	//close(this->sockfd);
-	return 0;
 }

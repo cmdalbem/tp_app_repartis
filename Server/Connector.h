@@ -15,6 +15,7 @@ public:
 	~Connector();
 
 	void send(string ip, string msg);
+	void receive(string *src, string *msg);
 	void broadcast(string msg);
 	
 	void addConnection(string ip);

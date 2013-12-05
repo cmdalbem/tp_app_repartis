@@ -99,7 +99,7 @@ void *Client::run() {
 	return 0;
 }
 
-static void *Client::runWrapper(void *context) {
+void *Client::runWrapper(void *context) {
 	return ((Client *) context)->run();
 }
 
@@ -116,3 +116,7 @@ int Client::clientMain(string hostName,int portNo) {
 	//this->closeClient();
 }
 
+main()
+{
+	
+}

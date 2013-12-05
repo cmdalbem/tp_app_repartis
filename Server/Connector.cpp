@@ -51,6 +51,11 @@ void Connector::send(string ip, string msg) {
 	msg = msg;
 }
 
+string Connector::receive() {
+	//...
+	
+}
+
 void Connector::broadcast(string msg) {
 	//...
 	msg = msg;

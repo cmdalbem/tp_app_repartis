@@ -89,7 +89,7 @@ void *BasicServer::run() {
 	close(this->newsockfd);
 }
 
-static void *BasicServer::runWrapper(void *context) {
+void *BasicServer::runWrapper(void *context) {
 	return ((BasicServer *) context)->run();
 }
 

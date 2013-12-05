@@ -12,6 +12,7 @@
 #include <netinet/in.h>
 #include <netdb.h> 
 #include <pubsub.h>
+#include <pthread.h>
 
 
 //class Client : public Subscriber {

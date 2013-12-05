@@ -60,9 +60,10 @@ void BasicServer::process() {
 		readMessage();
 		// answer
 		for(int i = 0; i < 255; i++) {
-			buffer[i] = "X says I've got your message"[i];
+			buffer[i] = "X -> Y: I've got your message"[i];
 		}
 		buffer[0] = machineId + '0';
+		buffer[5] = '?'; 
 		writeMessage(buffer);
 	}
 }
@@ -84,6 +85,8 @@ void *BasicServer::run() {
 			close(this->newsockfd);
 		}
 	}
+	close(this->sockfd);
+	close(this->newsockfd);
 }
 
 static void *BasicServer::runWrapper(void *context) {
@@ -91,8 +94,8 @@ static void *BasicServer::runWrapper(void *context) {
 }
 
 void BasicServer::serverMain(int machineId, int portNo) {
-	this->portNo = portNo;
 	this->machineId = machineId;
+	this->portNo = portNo;
 
 	// make a copy of the object to keep the 
 	// field initialized
@@ -100,7 +103,4 @@ void BasicServer::serverMain(int machineId, int portNo) {
 
 	threadedServer = new BasicServer(*this);
 	pthread_create(&t, NULL, &BasicServer::runWrapper, threadedServer);
-	// close the door
-	//close(this->newsockfd);
-	//close(this->sockfd);
 }

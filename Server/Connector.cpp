@@ -14,12 +14,13 @@ Connector::Connector(int machineId, unsigned int nbMaxClients, string listIpAdre
 	for (unsigned int i = 0; i < nbMaxClients-1; i++) {
 		clients.push_back(Client(machineId));
 	}	
-
-	bool allConnected = false;
+ 
+	bool allConnected;
+	bool change;
+	while(1) {
+	allConnected = false;
+	change = false;
 	while (! allConnected) {
-		if (! allConnected) {
-			printf("Connexion in progress...\n");
-		}
 		allConnected = true;
 		for (unsigned int i = 0; i < nbMaxClients-1; i++) {
 			if (! clients[i].isConnected()) {
@@ -27,10 +28,17 @@ Connector::Connector(int machineId, unsigned int nbMaxClients, string listIpAdre
 				allConnected = false;
 			}
 		}
-		// attemp to connect every 5 seconds
-		//sleep(5);
+		if (! allConnected) {
+			change = true;
+			printf("Connexion in progress...\n");
+		}
+		// attemp to connect every x seconds
+		sleep(5);
 	}
-	printf("Client(s) connected\n");
+	if (change) {
+		printf("Client(s) connected\n");
+	}
+	}
 }
 
 Connector::~Connector() {

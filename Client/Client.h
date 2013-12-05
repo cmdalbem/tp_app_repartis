@@ -1,7 +1,6 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -19,7 +18,7 @@
 class Client {
 public:
 	Client() : connected(false), threadedClient(NULL) {};
-	Client(int id) : connected(false), threadedClient(NULL), machineId(id)  {};
+	Client(int id) : machineId(id), connected(false), threadedClient(NULL) {};
 
 	void setPortNo(int portNo);
 

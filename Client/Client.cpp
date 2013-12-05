@@ -82,9 +82,10 @@ void *Client::run() {
 		// initialize & read into the buffer
 		bzero(buffer,256);
 		for(int i = 0; i < 255; i++) {
-			buffer[i] = "X says Hello world!"[i];
+			buffer[i] = "X -> Y: Hello world!"[i];
 		}
 		buffer[0] = machineId + '0';
+		buffer[5] = portNo - 5020 + '0';
 //		fgets(buffer,255,stdin);
 		// write to the other computer
 		this->writeMessage(buffer);
@@ -92,6 +93,8 @@ void *Client::run() {
 		this->readMessage(buffer);
 		sleep(10);
 	}
+
+	closeClient();
 
 	return 0;
 }

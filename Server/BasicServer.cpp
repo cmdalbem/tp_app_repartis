@@ -96,8 +96,9 @@ void BasicServer::serverMain(int portNo) {
 	printf("%i, %i\n", this->sockfd, this->clilen);
 	printf("%i, %i\n", tmp.sockfd, tmp.clilen);
 	pthread_create(&t, NULL, &BasicServer::runWrapper, &tmp);
+	// Crappy instruction : it will be a dead lock !
 	// wait for the thread to finish
-	pthread_join(&t, NULL);
+//	pthread_join(&t, NULL);
 	// close the door
 	close(this->newsockfd);
 	close(this->sockfd);

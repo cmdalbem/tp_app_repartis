@@ -36,6 +36,8 @@ public:
 
 	void listFiles();
 
+	void reestart();
+
 
 
 private:

@@ -120,9 +120,21 @@ File* Server::readFile(int file_id) {
 }
 
 void Server::listFiles() {
-	
 	// TO DO: how to retrieve a full list of files through servers?
 	
-	// just list local files for now
+	// temporary: just list local files for now
 	manager.showAll();
+}
+
+void Server::reestart() {
+	string msg = "reestart";
+	connector.broadcast(msg);
+
+	string src;
+	while (connector.receive(&src,&msg)) {
+		File* f = new File();
+		f->parse_JSON(msg);
+		manager.add(f);
+	}
+
 }

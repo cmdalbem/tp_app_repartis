@@ -13,7 +13,7 @@ BIN = res
 
 all: $(OBJS) $(OBJLIB)
 		#$(CC) $(FLAGS) $^ -o $(BIN) $(FLAGS) $(LIBS) 
-		$(CC) $(FLAGS) $^ $(FLAGS) $(LIBS) 
+#		$(CC) $(FLAGS) $^ $(FLAGS) $(LIBS) 
 
 
 clean:

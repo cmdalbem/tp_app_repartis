@@ -54,11 +54,16 @@ void BasicServer::readMessage() {
 }
 
 void BasicServer::process() {
+	char buffer[256];
 	while(1) {
 		// initialize the buffer and fill it	
 		readMessage();
 		// answer
-		writeMessage((char *) "I've got your message");
+		for(int i = 0; i < 255; i++) {
+			buffer[i] = "X says I've got your message"[i];
+		}
+		buffer[0] = portNo - 5020 + '0';
+		writeMessage(buffer);
 	}
 }
 

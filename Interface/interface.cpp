@@ -21,7 +21,7 @@ int main(void) {
 		// Connects to a server
 		while (server==NULL)
 			connectToServer();
-		//continue;
+		continue;
 		// Server is connected, we can start playing with files
 		cout << "(1) to create a file\n"
 				"(2) to delete a file\n"
@@ -71,10 +71,15 @@ void connectToServer()
 	cin >> port;
 	int portNo = 5020 + port[0] - '0';
 	cout << portNo << endl;
-	cout << "Please enter the clients port number: ";
-	unsigned int clientPort[2];
+	cout << "Enter the number of machines (<10)" << endl;
 	cin >> port;
-	clientPort[0] = 5020 + port[0] - '0';
+	int nbMachine = port[0] - '0';
+	unsigned int clientPort[10];
+	for (int i = 0; i < nbMachine - 1; i++) {
+		cout << "Please enter the clients port number: ";
+		cin >> port;
+		clientPort[i] = 5020 + port[0] - '0';
+	}
 
 	// Connect to server
 	string tmp[] = {"localhost", "localhost"};

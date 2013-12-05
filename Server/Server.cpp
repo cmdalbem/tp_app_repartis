@@ -60,7 +60,7 @@ void Server::deleteFile(int file_id) {
 File* Server::readFile(int file_id) {
 	File* file = NULL;
 
-	// Check if the file is avaiable locally
+	// Check if the file is available locally
 	file = manager.read(file_id);
 	if(file)
 		return file;
@@ -68,19 +68,19 @@ File* Server::readFile(int file_id) {
 		string msg;
 		
 		// Asks who has the file
-		sprintf(msg,"who_has %i",file_id);
-		broadcast(msg);
+		msg = "who_has " + file_id;
+		connector.broadcast(msg);
 
 		// Waits until someone answers
 		string src;
-		receive(&src,&msg);
+		connector.receive(&src,&msg);
 
 		// Asks the file for the first who answered
-		sprintf(msg,"file_req %i",file_id);
-		send(src,msg);
+		msg = "file_req " + file_id;
+		connector.send(src,msg);
 
 		// Receive the file
-		receive(&src,&msg);
+		connector.receive(&src,&msg);
 
 		// TODO: Parse the file...
 

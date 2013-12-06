@@ -1,18 +1,46 @@
 #include <iostream>
 #include <string>
-
 #include "Server.h"
 #include "Connector.h"
+#include <fstream>
+
+using namespace std;
+
+//const string Server::configFile = "../system.cfg";
+const string Server::configFile = "system.cfg";
+
+void Server::configure() {
+	ifstream file;
+	file.open(this->configFile.c_str());
+	if (! file.is_open()) {
+		file.open(("../" +this->configFile).c_str());
+	}
+	if (! file.is_open()) {
+		printf("Error on configuration file %s opening\n", configFile.c_str());
+		exit(0);
+	}
+
+	string tmp;
+	char buffer[200];
+	file.getline(buffer, 200);
+	file >> nbMaxErrors;  
+	file.getline(buffer, 200);
+	file.getline(buffer, 200);
+	file >> nbMaxClients;
+} 
 
 Server::Server(string ip) {
+	configure();
+
 	this->ip = ip;
 }	
 
 
 Server::Server(int machineId, string ip, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo) {
+	configure();
 	this->ip = ip;
 	// do the complex server/client initializations here 
-	Connector(machineId, nb_max_clients, listIpAdress, clientPortNo, portNo);
+	Connector(machineId, nbMaxClients, listIpAdress, clientPortNo, portNo);
 } 
 
 Server::~Server() {	
@@ -37,7 +65,7 @@ void Server::newFile(string title, string content) {
 
 	// Replicate it in the network
 	string src;
-	for (int i = 0; i < nb_max_errors+1; ++i) {
+	for (int i = 0; i < nbMaxErrors+1; ++i) {
 		// Send the file for the first K+1 guys who answers
 		connector.receive(&src,&msg);
 		connector.send(src,msg);

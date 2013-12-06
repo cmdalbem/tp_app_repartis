@@ -12,10 +12,6 @@ using namespace std;
 
 class Server {
 public:
-	// TODO transcript it into parameters
-	static const unsigned int nb_max_errors = 1; //K
-	static const unsigned int nb_max_clients = 2; //M
-	static const unsigned int nb_servers = 2; //N
 
 	Server(); 
 	Server(string ip); 
@@ -40,13 +36,17 @@ public:
 	void reestart();
 
 
+	void configure();
 
 private:
+	static const string configFile; 
 	FilesManager manager;
 	Connector connector;
 
 	string ip;
 
 	int lastId; // has to be synchronized by everybody
-
+	// TODO transcript it into parameters
+	unsigned int nbMaxErrors; // K
+	unsigned int nbMaxClients; // M
 };

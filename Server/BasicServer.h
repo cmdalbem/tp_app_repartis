@@ -50,3 +50,5 @@ private:
 	// adress of the object used in the thread
 	BasicServer *threadedServer;
 };
+
+#endif

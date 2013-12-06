@@ -48,7 +48,7 @@ private:
 	// wrapper to launch a thread
 	static void *runWrapper(void *context);
 	// used to signal an error & quit the thread
-	void Client::error(const char * msg) {
+	void error(const char * msg); 
 
 	// id of the machine using the client
 	int machineId;

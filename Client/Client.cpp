@@ -1,7 +1,7 @@
 #include "Client.h"
 
 // simple constructor with default value
-Client(int id) : connected(false), machineId(id), threadedClient(NULL) 	{
+Client::Client(int id) : connected(false), machineId(id), threadedClient(NULL) 	{
 	pthread_mutex_init(&m, NULL);
 	pthread_cond_init(&c, NULL);
 };

@@ -1,38 +1,52 @@
 #include "Client.h"
 
+// simple constructor with default value
+Client(int id) : connected(false), machineId(id), threadedClient(NULL) 	{
+	pthread_mutex_init(&m, NULL);
+	pthread_cond_init(&c, NULL);
+};
+
+// simple destructor
+Client::~Client() {
+	closeClient();
+}
+
+// set the port number
 void Client::setPortNo(int portNo) {
 	this->portNo = portNo;
 }
 
+// create the socket and initialize it
 void Client::createSocket(string hostName) {
 	// create a socket 	AF_INET for Internet Domain
-	// 					SOCK_STREAM for a stream
-	//					0 is a magic number
+	//	 		SOCK_STREAM for a stream
+	//			0 is a magic number
 	this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	// test the opening
 	if (this->sockfd == -1) 
 		error("ERROR opening socket");
-	// get the host. Once again, be confident in the input
+	// get the host
 	this->server = gethostbyname(hostName.c_str());
 	// test the initialisation
 	if (this->server == NULL) {
 		fprintf(stderr,"ERROR, no such host\n");
 		exit(0);
 	}
-	// initialize serv_addr
-	bzero((char *) &this->serv_addr, sizeof(this->serv_addr));
+	// initialize servAddr
+	bzero((char *) &this->servAddr, sizeof(this->servAddr));
 	// address family -> internet
-	this->serv_addr.sin_family = AF_INET;
+	this->servAddr.sin_family = AF_INET;
 	// copy the host address
 	bcopy((char *)this->server->h_addr, 
-			(char *)&this->serv_addr.sin_addr.s_addr,
+			(char *)&this->servAddr.sin_addr.s_addr,
 			this->server->h_length);
 	// translate the port into web byte order
-	this->serv_addr.sin_port = htons(this->portNo);
+	this->servAddr.sin_port = htons(this->portNo);
 }	
 
+// connect the socket to the server
 void Client::connectSocket() {
-	if (connect(this->sockfd,(struct sockaddr *) &this->serv_addr,sizeof(this->serv_addr)) < 0) { 
+	if (connect(this->sockfd,(struct sockaddr *) &this->servAddr,sizeof(this->servAddr)) < 0) { 
 		connected = false;
 		error("ERROR connecting");
 	} else {
@@ -40,10 +54,12 @@ void Client::connectSocket() {
 	}
 }
 
+// has to be called before the destruction
 void Client::closeClient() {
 	close(this->sockfd);
 }
 
+// write a message to the server
 void Client::writeMessage(char* buffer) {
 	int tmp;
 	tmp = write(this->sockfd, buffer, strlen(buffer)); 
@@ -54,6 +70,7 @@ void Client::writeMessage(char* buffer) {
 	}
 }
 
+// read a message from the server
 void Client::readMessage(char *buffer) {
 	int tmp;
 	bzero(buffer,256);
@@ -63,15 +80,16 @@ void Client::readMessage(char *buffer) {
 	printf("Client: %s\n", buffer);		
 }
 
+// return true if the client is connected, false otherwise
 bool Client::isConnected() {
 	if (threadedClient != NULL) {
-//		printf("%b\n", threadedClient->connected);
 		return threadedClient->connected; 
 	} else {
 		return false;
 	}
 }
 
+// everything needed to run a server
 void *Client::run() {
 	this->connectSocket();		
 	// buffer used for the communication
@@ -99,10 +117,12 @@ void *Client::run() {
 	return 0;
 }
 
+// wrapper to launch a thread
 void *Client::runWrapper(void *context) {
 	return ((Client *) context)->run();
 }
 
+// launch a new client on a thread
 int Client::clientMain(string hostName,int portNo) {
 	// be confident that your user is not a troll
 	this->setPortNo(portNo);
@@ -137,4 +157,10 @@ void Client::getEvent(Event& event) {
 	event = eventQueue.front(); 
 	eventQueue.pop_front();
 	pthread_mutex_unlock(&m);
+}
+
+void Client::error(const char * msg) {
+	connected = false;
+	perror(msg);
+	pthread_exit(NULL);
 }

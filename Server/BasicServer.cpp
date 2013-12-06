@@ -1,5 +1,6 @@
 #include "BasicServer.h"
 
+// initialize the server
 void BasicServer::initialize(int portNo) {
 	// define a new socket for internet domain & streaming
 	// 0 is a magic number
@@ -9,7 +10,7 @@ void BasicServer::initialize(int portNo) {
 		error("ERROR opening socket");
 	// initialise the buffer. 'cause security
 	bzero((char *) &this->serv_addr, sizeof(this->serv_addr));
-	// get the port number. Trust the user for the input
+	// set the port number 
 	this->portNo = portNo;
 	// define the server adress
 	// address family : INET
@@ -22,27 +23,31 @@ void BasicServer::initialize(int portNo) {
 	if (bind(this->sockfd, (struct sockaddr *) &this->serv_addr,
 				sizeof(this->serv_addr)) < 0) 
 		error("ERROR on binding");
-
+	// listen on socket
 	listen(this->sockfd, 5);
-	// wait until a client connects to the server
 	this->clilen = sizeof(this->cli_addr);
 }
 	
+// try to accept incoming connection 
 void BasicServer::connectServer() {
+	// wait until a client connects to the server
 	this->newsockfd = accept(this->sockfd, 
 			(struct sockaddr *) &this->cli_addr, 
 			&this->clilen);
+	// test the connexion
 	if (this->newsockfd < 0) { 
 		printf("Server ERROR on accept\n");
 	}
 }
 
+// write a message to the client
 void BasicServer::writeMessage(char * msg) {
 	int tmp;
 	tmp = write(this->newsockfd, msg, strlen(msg));
 	if (tmp < 0) error("ERROR writing to socket");
 }
 
+// answer a client
 void BasicServer::readMessage() {
 	char buffer[256];
 	int tmp;
@@ -53,6 +58,7 @@ void BasicServer::readMessage() {
 	printf("Server: %s\n",buffer);	
 }
 
+// defines the behaviour of the server 
 void BasicServer::process() {
 	char buffer[256];
 	while(1) {
@@ -68,6 +74,7 @@ void BasicServer::process() {
 	}
 }
 
+// everything needed to run a server 
 void *BasicServer::run() {
 	initialize(this->portNo);
 	int pid;
@@ -75,9 +82,10 @@ void *BasicServer::run() {
 	while(1) {
 		// listen to the socket
 		this->connectServer();
+		// fork to accept other connection	
 		pid = fork();
-
 		if (pid == 0) {
+			// the child must behave correctly
 			close(this->sockfd);
 			process();
 			exit(0);
@@ -89,18 +97,27 @@ void *BasicServer::run() {
 	close(this->newsockfd);
 }
 
+// wrapper to launch a thread
 void *BasicServer::runWrapper(void *context) {
 	return ((BasicServer *) context)->run();
 }
 
+// launch a server on port portNo	
 void BasicServer::serverMain(int machineId, int portNo) {
 	this->machineId = machineId;
 	this->portNo = portNo;
 
-	// make a copy of the object to keep the 
-	// field initialized
 	pthread_t t;
 
+	// make a copy of the object to keep the 
+	// field initialized
 	threadedServer = new BasicServer(*this);
 	pthread_create(&t, NULL, &BasicServer::runWrapper, threadedServer);
+}
+
+// use to signal an error & quit the thread
+void BasicServer:: error(const char *msg)
+{
+	perror(msg);
+	pthread_exit(NULL);
 }

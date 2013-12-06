@@ -1,5 +1,3 @@
-/* A simple server in the internet domain using TCP
-   The port number is passed as an argument */
 #ifndef BASICSERVER_H
 #define BASICSERVER_H
 
@@ -13,20 +11,35 @@
 #include <pubsub.h>
 #include <pthread.h>
 
-
+/* 
+   A simple server in the internet domain using TCP
+   The port number is passed as an argument 
+*/
 
 class BasicServer : public Publisher {
 public:
-	void initialize(int portNo);
-	void connectServer(); 
-	void writeMessage(char * msg);
-	void readMessage();
-	void process();
-	void serverMain(int id, int portNo);
+	// launch a server on port portNo on a thread	
+	void serverMain(int machineId, int portNo);
+	// everything needed to run a server 
 	void *run(); 
-	static void *runWrapper(void *context);
 
 private:
+	// defines the behaviour of the server 
+	void process();
+	// initialize the server
+	void initialize(int portNo);
+	// try to accept incoming connection 
+	void connectServer(); 
+	// write a message to the client
+	void writeMessage(char * msg);
+	// answer a client
+	void readMessage();
+	// wrapper to launch a thread
+	static void *runWrapper(void *context);
+	// use to signal an error & quit the thread
+	void error(const char *msg);
+
+	// id of the machine using this server
 	int machineId;
 	// defines two file descriptor and the port number
 	int sockfd, newsockfd, portNo;
@@ -34,34 +47,6 @@ private:
 	socklen_t clilen;
 	// internet address of the server and the client
 	struct sockaddr_in serv_addr, cli_addr;
+	// adress of the object used in the thread
 	BasicServer *threadedServer;
-
-	void error(const char *msg)
-	{
-		perror(msg);
-		pthread_exit(NULL);
-	}
-
-	void usage(int argc) 
-	{
-		if (argc < 2) {
-			fprintf(stderr,"ERROR, no port provided\n");
-			exit(1);
-		}
-	}
 };
-
-
-
-/*
-   int main(int argc, char *argv[])
-   {
-   Server server;
-   server.serverMain(argc, argv);
-
-   return 0; 
-   }
- */
-
-#endif
-

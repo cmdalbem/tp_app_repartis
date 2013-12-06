@@ -18,58 +18,56 @@
 
 class Client : public Subscriber {
 public:
-	Client() : connected(false), threadedClient(NULL) {};
-	Client(int id) : connected(false), machineId(id), threadedClient(NULL) 
-	{
-		pthread_mutex_init(&m, NULL);
-		pthread_cond_init(&c, NULL);
-	};
-
-	void setPortNo(int portNo);
-
-	void createSocket(std::string hostName);
-
-	void connectSocket(); 
-
-	void closeClient();
-
-	void writeMessage(char* buffer);
-
-	void readMessage(char* buffer);
-
+	// simple constructor with default value
+	Client(int id);
+	// simple destructor
+	~Client(); 
+	// return true if the client is connected, false otherwise
+	bool isConnected();
+	// launch a new client on a thread
+	int clientMain(std::string hostName, int portNo);
+	// everything needed to run a server
 	void *run(); 
 
-	bool isConnected();
-
-	static void *runWrapper(void *context);
-
-	int clientMain(std::string hostName, int portNo);
-	bool connected;
 	void update(Publisher* who, Event& what); 
 	void getEvent(Event& event); 
 
 private:
-	list<Event> eventQueue;
-	pthread_mutex_t m;
-	pthread_cond_t c;
+	// set the port number
+	void setPortNo(int portNo);
+	// create the socket and initialize it
+	void createSocket(std::string hostName);
+	// connect the socket to the server
+	void connectSocket(); 
+	// has to be called before the destruction
+	void closeClient();
+	// write a message to the server
+	void writeMessage(char* buffer);
+	// read a message from the server
+	void readMessage(char* buffer);
+	// wrapper to launch a thread
+	static void *runWrapper(void *context);
+	// used to signal an error & quit the thread
+	void Client::error(const char * msg) {
 
+	// id of the machine using the client
 	int machineId;
 	// defines the file descriptor of the socket
 	int sockfd;
 	// defines the port number 
 	int portNo;
 	// internet address of the server
-	struct sockaddr_in serv_addr;
+	struct sockaddr_in servAddr;
 	// pointer to the computer hosting the server
 	struct hostent *server;
+	// object used in the thread
 	Client *threadedClient;
-	// 
+	// indicates wheter the client is connected or not
+	bool connected;
 
-	void error(const char * msg) {
-		connected = false;
-		perror(msg);
-		pthread_exit(NULL);
-	}
+	list<Event> eventQueue;
+	pthread_mutex_t m;
+	pthread_cond_t c;
 };
 
 #endif

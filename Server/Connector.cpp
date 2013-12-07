@@ -8,13 +8,12 @@ Connector::Connector(Server *pserver) {
 	/* receiver(pserver); */
 }
 
-Connector::Connector(int machineId, unsigned int nbMaxClients, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo, Server *pserver) {
-
+Connector::Connector(int machineId, unsigned int nbMaxSenders, string listIpAdress[], unsigned int senderPortNo[], unsigned int portNo, Server *pserver) {
 	receiver=Receiver(pserver);
 	receiver.serverMain(machineId, portNo);		
 	printf("Serveur launched\n");
 
-	for (unsigned int i = 0; i < nbMaxClients-1; i++) {
+	for (unsigned int i = 0; i < nbMaxSenders-1; i++) {
 		senders.push_back(Sender(machineId));
 	}	
  
@@ -25,9 +24,9 @@ Connector::Connector(int machineId, unsigned int nbMaxClients, string listIpAdre
 		change = false;
 		while (! allConnected) {
 			allConnected = true;
-			for (unsigned int i = 0; i < nbMaxClients-1; i++) {
+			for (unsigned int i = 0; i < nbMaxSenders-1; i++) {
 				if (! senders[i].isConnected()) {
-					senders[i].SenderMain(listIpAdress[i], clientPortNo[i]);	
+					senders[i].SenderMain(listIpAdress[i], senderPortNo[i]);	
 					allConnected = false;
 				}
 			}

@@ -15,7 +15,7 @@ class Connector {
 public:
 	Connector() {};
 	Connector(Server *pserver);
-	Connector(int machineId, unsigned int nbMaxClients, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo, Server *pserver);
+	Connector(int machineId, unsigned int nbMaxSenders, string listIpAdress[], unsigned int senderPortNo[], unsigned int portNo, Server *pserver);
 	~Connector();
 
 	void send(string ip, string msg);

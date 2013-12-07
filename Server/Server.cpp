@@ -2,6 +2,7 @@
 #include <string>
 #include "Server.h"
 #include "Connector.h"
+#include <cmath>
 #include <fstream>
 
 using namespace std;
@@ -9,6 +10,8 @@ using namespace std;
 const string Server::configFile = "system.cfg";
 
 void Server::configure() {
+	lastFileId = 0;
+
 	ifstream file;
 	file.open(this->configFile.c_str());
 	if (! file.is_open()) {
@@ -32,12 +35,14 @@ Server::Server(string ip) {
 	configure();
 
 	this->ip = ip;
+	lastFileId = 0;
 }	
 
 
 Server::Server(int machineId, string ip, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo) {
 	configure();
 	this->ip = ip;
+	this->machineId = machineId;
 	// do the complex server/client initializations here 
 	Connector(machineId, nbMaxClients, listIpAdress, clientPortNo, portNo);
 } 
@@ -50,13 +55,23 @@ Server::~Server() {
 // Files Management //
 //////////////////////
 
+// returns the integer concatenation of the machineId with the lastFileId
+int Server::getNewFileId()
+{
+	#define COUNT_DIGITS(x) ((int) log10(x)+1)
+
+	// If machineId is '127001' and lastFileId is '666', then newFileId => 127001666
+	int newFileId = machineId * pow(10,COUNT_DIGITS(lastFileId)) + lastFileId;
+}
+
 //File* Server::newFile(string title, string content) {
 void Server::newFile(string title, string content) {
 	string msg;
 
 	// Create new file
-	File* f = new File(lastId, title, content);
+	File* f = new File(getNewFileId(), title, content);
 	f->to_JSON(msg);
+	msg = "f_" + msg;
 
 	// Finds out who is alive
 	msg = "alive?";
@@ -73,9 +88,7 @@ void Server::newFile(string title, string content) {
 	// Add file locally
 	manager.add(f);
 
-	// TEMPORARY
-	lastId++;
-
+	lastFileId++;
 }
 
 void Server::updateFile(int file_id, string title, string content) {
@@ -89,6 +102,8 @@ void Server::updateFile(int file_id, string title, string content) {
 	string src;
 	File* f = new File(file_id, title, content);
 	f->to_JSON(msg);
+	msg = "f_" + msg;
+
 	while (connector.receive(&src,&msg))
 		connector.send(src,msg);
 

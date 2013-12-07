@@ -9,7 +9,7 @@ class Subscriber
 {
 	public:
 		virtual ~Subscriber() {}
-		virtual void update(Publisher* who, Event& what) = 0;
+		virtual void update(Event& what) = 0;
 
 };
 

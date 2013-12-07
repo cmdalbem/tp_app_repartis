@@ -11,7 +11,7 @@ using namespace std;
 #define DEFAULT_TIMEOUT 0.5
 class Server;
 
-class Connector {
+class Connector: Publisher {
 public:
 	Connector() {};
 	Connector(Server *pserver);
@@ -24,11 +24,11 @@ public:
 	void broadcast(string msg);
 	
 	void addConnection(string ip);
+	
 
-
+	vector<Sender> senders;
 
 private:
-	vector<Sender> senders;
 	Receiver receiver;
 };
 

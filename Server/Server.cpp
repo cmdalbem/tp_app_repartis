@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <Event.h>
 #include "Connector.h"
 #include "Server.h"
 #include <fstream>
@@ -44,6 +45,12 @@ Server::Server(int machineId, string ip, string listIpAdress[], unsigned int cli
 
 Server::~Server() {	
 
+}
+
+void Server::ping() {
+	cout << "Sending a ping" << endl;
+	Event event = Event(Ping,"Ping");
+	this->connector.senders[0].update(event);
 }
 
 //////////////////////
@@ -168,5 +175,7 @@ void Server::reestart() {
 }
 
 void Server::handleMessage(char *msg) {
+	cout<<"handleMessage"<<endl;
+	ping();
 	return;
 }

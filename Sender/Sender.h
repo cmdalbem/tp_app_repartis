@@ -29,7 +29,7 @@ public:
 	// everything needed to run a server
 	void *run(); 
 
-	void update(Publisher* who, Event& what); 
+	void update(Event& what); 
 	void getEvent(Event& event); 
 	void treatEvent(Event& event);
 

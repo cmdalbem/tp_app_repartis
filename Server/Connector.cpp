@@ -3,9 +3,10 @@
 
 #include "Connector.h"
 #include "Server.h"
+#include "Event.h"
 
 Connector::Connector(Server *pserver) {
-	/* receiver(pserver); */
+	 receiver = Receiver(pserver); 
 }
 
 Connector::Connector(int machineId, unsigned int nbMaxSenders, string listIpAdress[], unsigned int senderPortNo[], unsigned int portNo, Server *pserver) {
@@ -39,6 +40,8 @@ Connector::Connector(int machineId, unsigned int nbMaxSenders, string listIpAdre
 		}
 		if (change) {
 			printf("Client(s) connected\n");
+			Event event = Event(Ping,"ping");
+			senders[0].update(event);
 		}
 	}
 }

@@ -62,6 +62,7 @@ void Receiver::readMessage(char *buffer) {
 void Receiver::process() {
 	char buffer[256];
 	while(1) {
+		cout << "Waiting for a message" << endl;
 		readMessage(buffer);
 		this->server->handleMessage(buffer);
 	}
@@ -74,12 +75,17 @@ void *Receiver::run() {
 	// while true listen. Good student		  	
 	while(1) {
 		// listen to the socket
+		cout<<"Waiting for a connection"<<endl;
 		this->connectServer();
+		cout<<"passing through"<<endl;
 		// fork to accept other connection	
 		pid = fork();
 		if (pid == 0) {
+			
 			// the child must behave correctly
 			close(this->sockfd);
+			cout << "Entering process" <<endl;
+			
 			process();
 			exit(0);
 		} else {

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
-#include "Server.h"
 #include "Connector.h"
+#include "Server.h"
 #include <fstream>
 
 using namespace std;
@@ -30,7 +30,7 @@ void Server::configure() {
 
 Server::Server(string ip) {
 	configure();
-
+	this->connector = Connector(this); 
 	this->ip = ip;
 }	
 
@@ -39,7 +39,7 @@ Server::Server(int machineId, string ip, string listIpAdress[], unsigned int cli
 	configure();
 	this->ip = ip;
 	// do the complex server/client initializations here 
-	Connector(machineId, nbMaxClients, listIpAdress, clientPortNo, portNo);
+	Connector(machineId, nbMaxClients, listIpAdress, clientPortNo, portNo, this);
 } 
 
 Server::~Server() {	
@@ -165,4 +165,8 @@ void Server::reestart() {
 		manager.add(f);
 	}
 
+}
+
+void Server::handleMessage(char *msg) {
+	return;
 }

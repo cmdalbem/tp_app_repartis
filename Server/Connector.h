@@ -9,11 +9,13 @@
 using namespace std;
 
 #define DEFAULT_TIMEOUT 0.5
+class Server;
 
 class Connector {
 public:
-	Connector();
-	Connector(int machineId, unsigned int nbMaxClients, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo);
+	Connector() {};
+	Connector(Server *pserver);
+	Connector(int machineId, unsigned int nbMaxClients, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo, Server *pserver);
 	~Connector();
 
 	void send(string ip, string msg);

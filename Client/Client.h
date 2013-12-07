@@ -31,6 +31,7 @@ public:
 
 	void update(Publisher* who, Event& what); 
 	void getEvent(Event& event); 
+	void treatEvent(Event& event);
 
 private:
 	// set the port number

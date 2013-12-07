@@ -89,26 +89,30 @@ bool Client::isConnected() {
 	}
 }
 
+void Client::treatEvent(Event& event)
+{
+	char buffer[256];
+	if (event.getType() == Ping) {
+		bzero(buffer,256);
+		sprintf(buffer,event.getMessage().c_str());
+		this->writeMessage(buffer);
+	}
+
+}
+
+
+
 // everything needed to run a server
 void *Client::run() {
 	this->connectSocket();		
 	// buffer used for the communication
-	char buffer[256];
 
 	// it's gonna be a long talk
+	Event event(Ping,"PING");
 	while(1) {
 		// initialize & read into the buffer
-		bzero(buffer,256);
-		for(int i = 0; i < 255; i++) {
-			buffer[i] = "X -> Y: Hello world!"[i];
-		}
-		buffer[0] = machineId + '0';
-		buffer[5] = portNo - 5020 + '0';
-//		fgets(buffer,255,stdin);
-		// write to the other computer
-		this->writeMessage(buffer);
-		// wait for the answer
-		this->readMessage(buffer);
+		this->getEvent(event);
+		this->treatEvent(event);
 		sleep(10);
 	}
 
@@ -158,6 +162,7 @@ void Client::getEvent(Event& event) {
 	eventQueue.pop_front();
 	pthread_mutex_unlock(&m);
 }
+
 
 void Client::error(const char * msg) {
 	connected = false;

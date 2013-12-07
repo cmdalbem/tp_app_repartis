@@ -76,6 +76,7 @@ void *Receiver::run() {
 		// listen to the socket
 		this->connectServer();
 		// fork to accept other connection	
+		// TODO: change it to create a new thread instead of forking
 		pid = fork();
 		if (pid == 0) {
 			// the child must behave correctly

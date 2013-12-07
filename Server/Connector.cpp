@@ -8,36 +8,36 @@ Connector::Connector() {
 }
 
 Connector::Connector(int machineId, unsigned int nbMaxClients, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo) {
-	server.serverMain(machineId, portNo);		
+	receiver.serverMain(machineId, portNo);		
 	printf("Serveur launched\n");
 
 	for (unsigned int i = 0; i < nbMaxClients-1; i++) {
-		clients.push_back(Client(machineId));
+		senders.push_back(Sender(machineId));
 	}	
  
 	bool allConnected;
 	bool change;
 	while(1) {
-	allConnected = false;
-	change = false;
-	while (! allConnected) {
-		allConnected = true;
-		for (unsigned int i = 0; i < nbMaxClients-1; i++) {
-			if (! clients[i].isConnected()) {
-				clients[i].clientMain(listIpAdress[i], clientPortNo[i]);	
-				allConnected = false;
+		allConnected = false;
+		change = false;
+		while (! allConnected) {
+			allConnected = true;
+			for (unsigned int i = 0; i < nbMaxClients-1; i++) {
+				if (! senders[i].isConnected()) {
+					senders[i].SenderMain(listIpAdress[i], clientPortNo[i]);	
+					allConnected = false;
+				}
 			}
+			if (! allConnected) {
+				change = true;
+				printf("Connexion in progress...\n");
+			}
+			// attemp to connect every x seconds
+			sleep(5);
 		}
-		if (! allConnected) {
-			change = true;
-			printf("Connexion in progress...\n");
+		if (change) {
+			printf("Client(s) connected\n");
 		}
-		// attemp to connect every x seconds
-		sleep(5);
-	}
-	if (change) {
-		printf("Client(s) connected\n");
-	}
 	}
 }
 

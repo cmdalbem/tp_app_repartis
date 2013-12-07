@@ -6,7 +6,6 @@
 
 using namespace std;
 
-//const string Server::configFile = "../system.cfg";
 const string Server::configFile = "system.cfg";
 
 void Server::configure() {
@@ -155,6 +154,7 @@ void Server::listFiles() {
 }
 
 void Server::reestart() {
+	// TODO: make it select only one machine to receive a given file from.
 	string msg = "reestart";
 	connector.broadcast(msg);
 

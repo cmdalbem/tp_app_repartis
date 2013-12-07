@@ -3,7 +3,7 @@ FLAGS = -Wall -Wextra -I ../File
 LIBS = -lpthread
 
 # Seulement ajoutez ici le nom du nouveaux module qui tu a crée ;)
-OBJS = Client.o ../File/pubsub.o
+OBJS = Sender.o ../File/pubsub.o
 
 BIN = res
 

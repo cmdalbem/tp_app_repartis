@@ -3,8 +3,8 @@
 
 #include <iostream>
 #include <vector>
-#include <Client.h>
-#include <BasicServer.h>
+#include <Sender.h>
+#include <Receiver.h>
 
 using namespace std;
 
@@ -26,9 +26,8 @@ public:
 
 
 private:
-	vector<string> pairs;
-	vector<Client> clients;
-	BasicServer server;
+	vector<Sender> senders;
+	Receiver receiver;
 };
 
 #endif

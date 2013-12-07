@@ -4,7 +4,7 @@ LIBS = -lpthread
 INC = -I./ -I../Client/
 
 # Seulement ajoutez ici le nom du nouveaux module qui tu a crée ;)
-OBJS = BasicServer.o Server.o Connector.o ../File/pubsub.o ../File/FilesManager.o ../File/File.o ../Client/Client.o
+OBJS = Receiver.o Server.o Connector.o ../File/pubsub.o ../File/FilesManager.o ../File/File.o ../Client/Sender.o
 
 BIN = res
 

@@ -1,4 +1,6 @@
 #include "Receiver.h"
+#include "Connector.h"
+#include "Server.h"
 
 // initialize the server
 void Receiver::initialize(int portNo) {
@@ -48,27 +50,20 @@ void Receiver::writeMessage(char * msg) {
 }
 
 // answer a client
-void Receiver::readMessage() {
-	char buffer[256];
+// buffer need to be more thant 255 chars
+void Receiver::readMessage(char *buffer) {
 	int tmp;
 	bzero(buffer,256);
 	tmp = read(this->newsockfd, buffer, 255);
 	if (tmp < 0) error("ERROR reading from socket");
-	// read loudly
-	printf("Server: %s\n",buffer);	
 }
 
 // defines the behaviour of the server 
 void Receiver::process() {
 	char buffer[256];
 	while(1) {
-		// initialize the buffer and fill it	
-		readMessage();
-		// answer
-		sprintf(buffer,"X -> Y: I've got your message");
-		buffer[0] = machineId + '0';
-		buffer[5] = '?'; 
-		writeMessage(buffer);
+		readMessage(buffer);
+		this->server->handleMessage(buffer);
 	}
 }
 
@@ -109,7 +104,7 @@ void Receiver::serverMain(int machineId, int portNo) {
 
 	// make a copy of the object to keep the 
 	// field initialized
-	threadedServer = new Receiver(*this);
+	threadedServer = new Receiver(this->server);
 	pthread_create(&t, NULL, &Receiver::runWrapper, threadedServer);
 }
 

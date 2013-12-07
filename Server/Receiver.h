@@ -15,15 +15,20 @@
    A simple server in the internet domain using TCP
    The port number is passed as an argument 
 */
-
+class Server;
 class Receiver : public Publisher {
 public:
 	// launch a server on port portNo on a thread	
+	
+	Receiver() {}
+	Receiver(Server *pserver){ /*this->server = pserver;*/}
+		 
 	void serverMain(int machineId, int portNo);
 	// everything needed to run a server 
 	void *run(); 
 
 private:
+	Server *server;
 	// defines the behaviour of the server 
 	void process();
 	// initialize the server
@@ -33,7 +38,7 @@ private:
 	// write a message to the client
 	void writeMessage(char * msg);
 	// answer a client
-	void readMessage();
+	void readMessage(char *buffer);
 	// wrapper to launch a thread
 	static void *runWrapper(void *context);
 	// use to signal an error & quit the thread

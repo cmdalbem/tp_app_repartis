@@ -2,12 +2,14 @@
 #include <vector>
 
 #include "Connector.h"
+#include "Server.h"
 
-Connector::Connector() {
-
+Connector::Connector(Server *pserver) {
+	/* receiver(pserver); */
 }
 
-Connector::Connector(int machineId, unsigned int nbMaxSenders, string listIpAdress[], unsigned int senderPortNo[], unsigned int portNo) {
+Connector::Connector(int machineId, unsigned int nbMaxSenders, string listIpAdress[], unsigned int senderPortNo[], unsigned int portNo, Server *pserver) {
+	receiver=Receiver(pserver);
 	receiver.serverMain(machineId, portNo);		
 	printf("Serveur launched\n");
 

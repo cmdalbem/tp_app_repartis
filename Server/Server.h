@@ -1,3 +1,5 @@
+#ifndef  SERVER_H
+#define SERVER_H
 #include <iostream>
 #include <string>
 #include <vector>
@@ -5,10 +7,8 @@
 #include <jsoncpp/json.h>
 #include "File.h"
 #include "FilesManager.h"
-#include "Connector.h"
 
 using namespace std;
-
 
 class Server {
 public:
@@ -35,6 +35,7 @@ public:
 
 	void reestart();
 
+	void handleMessage(char *msg);
 
 	void configure();
 
@@ -58,3 +59,6 @@ private:
 	unsigned int nbMaxErrors; // K
 	unsigned int nbMaxClients; // M
 };
+
+#endif
+

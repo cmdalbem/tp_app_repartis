@@ -1,8 +1,8 @@
 CC = g++
-FLAGS = -Wall -Wextra -I ../File -I ../Server -I../Client -fpermissive -g
+FLAGS = -Wall -Wextra -I ../File -I ../Server -I../Sender -fpermissive -g
 LIBS = -lpthread -ljson_linux-gcc-4.7_libmt
 
-OBJS = interface.o ../File/File.o ../File/FilesManager.o ../Server/Server.o ../Server/Connector.o ../Server/Receiver.o ../Client/Sender.o
+OBJS = interface.o ../File/File.o ../File/FilesManager.o ../Server/Server.o ../Server/Connector.o ../Server/Receiver.o ../Sender/Sender.o
 
 BIN = res
 

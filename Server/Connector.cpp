@@ -7,7 +7,7 @@ Connector::Connector() {
 
 }
 
-Connector::Connector(int machineId, unsigned int nbMaxSenders, string listIpAdress[], unsigned int sendertPortNo[], unsigned int portNo) {
+Connector::Connector(int machineId, unsigned int nbMaxSenders, string listIpAdress[], unsigned int senderPortNo[], unsigned int portNo) {
 	receiver.serverMain(machineId, portNo);		
 	printf("Serveur launched\n");
 

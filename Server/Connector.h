@@ -13,7 +13,7 @@ using namespace std;
 class Connector {
 public:
 	Connector();
-	Connector(int machineId, unsigned int nbMaxSenders, string listIpAdress[], unsigned int sendertPortNo[], unsigned int portNo); 
+	Connector(int machineId, unsigned int nbMaxSenders, string listIpAdress[], unsigned int senderPortNo[], unsigned int portNo); 
 	~Connector();
 
 	void send(string ip, string msg);

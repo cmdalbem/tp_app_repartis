@@ -67,19 +67,19 @@ void connectToServer()
 //	cin >> ip;
 	ip = "localhost";
 
-	//cout << "Please enter the id (<10): ";
+	cout << "Please enter the id (<10): ";
 	cin >> port;
 	int machineId = port[0] - '0';
-	//cout << "Please enter the port number: ";
+	cout << "Please enter the port number: ";
 	cin >> port;
 	int portNo = 5020 + port[0] - '0';
 	cout << portNo << endl;
-	//cout << "Enter the number of machines (<10)" << endl;
+	cout << "Enter the number of machines (<10)" << endl;
 	cin >> port;
 	int nbMachine = port[0] - '0';
 	unsigned int clientPort[10];
 	for (int i = 0; i < nbMachine - 1; i++) {
-		//cout << "Please enter the clients port number: ";
+		cout << "Please enter the clients port number: ";
 		cin >> port;
 		clientPort[i] = 5020 + port[0] - '0';
 	}

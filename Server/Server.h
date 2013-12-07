@@ -45,9 +45,17 @@ private:
 	FilesManager manager;
 	Connector connector;
 
+	int getNewFileId();
+
+	// id of the machine using this server (often = ip)
+	int machineId;
+
+	// starts with 0, increments at each new file.
+	// the real file ID will be formed by machineID + lastFileID
+	int lastFileId;
+
 	string ip;
 
-	int lastId; // has to be synchronized by everybody
 	// TODO transcript it into parameters
 	unsigned int nbMaxErrors; // K
 	unsigned int nbMaxClients; // M

@@ -13,6 +13,7 @@ class Server;
 
 class Connector: Publisher {
 public:
+	void initialize(unsigned int nbMaxSenders,string listIpAdress[], unsigned int senderPortNo[]);
 	Connector() {};
 	Connector(Server *pserver);
 	Connector(int machineId, unsigned int nbMaxSenders, string listIpAdress[], unsigned int senderPortNo[], unsigned int portNo, Server *pserver);

@@ -30,6 +30,7 @@ public:
 private:
 	Server *server;
 	// defines the behaviour of the server 
+	static void *processWrapper(void *context);
 	void process();
 	// initialize the server
 	void initialize(int portNo);

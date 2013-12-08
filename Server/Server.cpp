@@ -46,7 +46,8 @@ Server::Server(int machineId, string ip, string listIpAdress[], unsigned int cli
 	this->ip = ip;
 	this->machineId = machineId;
 	// do the complex server/client initializations here 
-	Connector(machineId, nbMaxClients, listIpAdress, clientPortNo, portNo, this);
+	this->connector = Connector(machineId, nbMaxClients, listIpAdress, clientPortNo, portNo, this);
+	this->connector.initialize(nbMaxClients, listIpAdress, clientPortNo);
 	cout << "quitting Server" << endl;
 } 
 
@@ -57,7 +58,8 @@ Server::~Server() {
 void Server::ping() {
 	cout << "Sending a ping" << endl;
 	Event event = Event(Ping,"Ping");
-	this->connector.senders[0]->update(event);
+	this->connector.senders[0]->threadedSender->update(event);
+	cout << "Send the ping" << endl;
 }
 
 //////////////////////
@@ -193,6 +195,6 @@ void Server::reestart() {
 }
 
 void Server::handleMessage(char *msg) {
-	cout<<"handleMessage"<<endl;
+	cout<<"handleMessage: " << msg  <<endl;
 	ping();
 }

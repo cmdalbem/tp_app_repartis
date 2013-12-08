@@ -1,9 +1,12 @@
 #include "Sender.h"
+using namespace std;
 
 // simple constructor with default value
-Sender::Sender(int id) : connected(false), machineId(id), threadedSender(NULL) 	{
+Sender::Sender(int id) : threadedSender(NULL), connected(false), machineId(id){ 
+	cout << "entering Sender" << endl;
 	pthread_mutex_init(&m, NULL);
 	pthread_cond_init(&c, NULL);
+	cout << "quitting Sender" << endl;
 };
 
 // simple destructor
@@ -95,6 +98,7 @@ void Sender::treatEvent(Event& event)
 	if (event.getType() == Ping) {
 		bzero(buffer,256);
 		sprintf(buffer,event.getMessage().c_str());
+		cout << "writing the message" <<endl;
 		this->writeMessage(buffer);
 	}
 
@@ -112,8 +116,10 @@ void *Sender::run() {
 	while(1) {
 		// initialize & read into the buffer
 		this->getEvent(event);
+		cout<<"got out of getEvent"<<endl;
 		this->treatEvent(event);
-		sleep(10);
+		cout<<"handled the event" <<endl;
+		sleep(5);
 	}
 
 	closeSender();
@@ -141,7 +147,7 @@ int Sender::SenderMain(string hostName,int portNo) {
 	return 0;
 }
 
-void Sender::update(Publisher* who, Event& what) {
+void Sender::update(Event& what) {
 	pthread_mutex_lock(&m);
 	bool emptyQueue = eventQueue.empty();
 	this->eventQueue.push_back(what);
@@ -159,6 +165,7 @@ void Sender::getEvent(Event& event) {
 		pthread_cond_wait(&c,&m);
 	}
 	event = eventQueue.front(); 
+	cout << "got the event " << event.getMessage() << endl; 
 	eventQueue.pop_front();
 	pthread_mutex_unlock(&m);
 }

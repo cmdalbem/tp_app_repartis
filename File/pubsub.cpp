@@ -5,7 +5,7 @@ void Publisher::notify(Event& what)
    {
       list<Subscriber*>::iterator p;
       for(p = subscribers.begin(); p != subscribers.end(); p++)
-          (*p)->update(this, what);
+          (*p)->update(what);
    }
    notifyEnabled = true;
 }

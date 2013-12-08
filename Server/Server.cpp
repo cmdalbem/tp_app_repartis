@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <Event.h>
 #include "Connector.h"
 #include "Server.h"
 #include <cmath>
@@ -40,15 +41,23 @@ Server::Server(string ip) {
 
 
 Server::Server(int machineId, string ip, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo) {
+	cout << "entering Server" << endl;
 	configure();
 	this->ip = ip;
 	this->machineId = machineId;
 	// do the complex server/client initializations here 
 	Connector(machineId, nbMaxClients, listIpAdress, clientPortNo, portNo, this);
+	cout << "quitting Server" << endl;
 } 
 
 Server::~Server() {	
 
+}
+
+void Server::ping() {
+	cout << "Sending a ping" << endl;
+	Event event = Event(Ping,"Ping");
+	this->connector.senders[0].update(event);
 }
 
 //////////////////////
@@ -62,6 +71,7 @@ int Server::getNewFileId()
 
 	// If machineId is '127001' and lastFileId is '666', then newFileId => 127001666
 	int newFileId = machineId * pow(10,COUNT_DIGITS(lastFileId)) + lastFileId;
+	return newFileId;
 }
 
 //File* Server::newFile(string title, string content) {
@@ -79,7 +89,7 @@ void Server::newFile(string title, string content) {
 
 	// Replicate it in the network
 	string src;
-	for (int i = 0; i < nbMaxErrors+1; ++i) {
+	for (unsigned int i = 0; i < nbMaxErrors+1; ++i) {
 		// Send the file for the first K+1 guys who answers
 		connector.receive(&src,&msg);
 		connector.send(src,msg);
@@ -183,75 +193,6 @@ void Server::reestart() {
 }
 
 void Server::handleMessage(char *msg) {
-	
-	const int n = 13;
-	const char *msgs[] = {"file_req","who_has","i_has","reestart",
-						  "del","alive?","alive!","new_file","update_file",
-						  "delete_file","read_file","f_"};
-	int type=-1;
-
-	// Finds out which kind of message it is
-	for (int i = 0; i < n; ++i) {
-		if (strncmp(msg,msgs[i],strlen(msgs[i]))==0) {
-			type = i;
-			break;
-		}
-	}
-
-	cout << "Received message of type " << type << endl;
-
-	switch(type) {
-		case 0:
-			// file_req
-			break;
-
-		case 1:
-			// who_has
-			break;
-
-		case 2:
-			// i_has
-			break;
-
-		case 3:
-			// reestart
-			break;
-
-		case 4:
-			// del
-			break;
-
-		case 5:
-			// alive?
-			break;
-
-		case 6:
-			// alive!
-			break;
-
-		case 7:
-			// new_file
-			break;
-
-		case 8:
-			// update_file
-			break;
-
-		case 9:
-			// delete_file
-			break;
-
-		case 10:
-			// read_file
-			break;
-
-		case 11:
-			// f_
-			break;
-
-		default:
-			break;
-	}
-
-	return;
+	cout<<"handleMessage"<<endl;
+	ping();
 }

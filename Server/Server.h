@@ -36,6 +36,7 @@ public:
 	void reestart();
 
 	void handleMessage(char *msg);
+	void ping();
 
 	void configure();
 

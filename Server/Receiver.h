@@ -16,12 +16,12 @@
    The port number is passed as an argument 
 */
 class Server;
-class Receiver : public Publisher {
+class Receiver {
 public:
 	// launch a server on port portNo on a thread	
 	
 	Receiver() {}
-	Receiver(Server *pserver){ /*this->server = pserver;*/}
+	Receiver(Server *pserver){ this->server = pserver;}
 		 
 	void serverMain(int machineId, int portNo);
 	// everything needed to run a server 

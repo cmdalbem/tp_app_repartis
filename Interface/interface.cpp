@@ -21,8 +21,10 @@ int main(void) {
 		// Connects to a server
 		while (server==NULL)
 			connectToServer();
-		continue;
 		// Server is connected, we can start playing with files
+		cout << "connectedToServer ended" << endl;
+		continue;
+
 		cout << "(1) to create a file\n"
 				"(2) to delete a file\n"
 				"(3) to read a file\n"

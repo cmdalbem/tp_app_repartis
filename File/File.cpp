@@ -9,7 +9,7 @@ void File::to_JSON(string& output_data)
 	data["content"] = this->content;
 
 	Json::Value ownersNode;
-	for (int i = 0; i < owners.size(); ++i)
+	for (unsigned int i = 0; i < owners.size(); ++i)
 		ownersNode.append(owners[i]);
 	data["owners"] = ownersNode;
 	
@@ -27,7 +27,7 @@ int File::parse_JSON(string json_data)
 	this->id = data["id"].asInt();
 	this->title = data["title"].asString();
 	this->content = data["content"].asString();
-	for ( int i = 0; i < data["owners"].size(); i++ )
+	for (unsigned int i = 0; i < data["owners"].size(); i++ )
 		this->owners.push_back(data["owners"][i].asInt());
 
 	return 0;
@@ -41,7 +41,7 @@ string File::show() {
 
 	res = "id = " + ss.str() + ", title = " + this->title + ", content= " + this->content + ", owners= ";
 
-	for (int i = 0; i < owners.size(); ++i){
+	for (unsigned int i = 0; i < owners.size(); ++i){
 		ss << owners[i];
 		res += ss.str() + ", ";
 	}

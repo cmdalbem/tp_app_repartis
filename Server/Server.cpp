@@ -89,10 +89,11 @@ void Server::newFile(string title, string content, vector<int> owners) {
 
 	// Replicate it in the network
 	string src;
+	int dest;
 	for (unsigned int i = 0; i < nbMaxErrors+1; ++i) {
 		// Send the file for the first K+1 guys who answers
 		connector.receive(&src,&buffer);
-		connector.send(src,fileMsg);
+		connector.send(dest,fileMsg);
 	}
 
 	// Add file locally
@@ -112,8 +113,9 @@ void Server::updateFile(int file_id, string title, string content, vector<int> o
 	File* f = new File(file_id, title, content, owners);
 	string msg = msg_file_transfer(f);
 
+	int dest;
 	while (connector.receive(&src,&buffer))
-		connector.send(src,msg);
+		connector.send(dest, msg);
 
 	// Check if the file is available locally
 	File* file = manager.read(file_id);
@@ -153,7 +155,8 @@ File* Server::readFile(int file_id) {
 		connector.receive(&src,&msg);
 
 		// Asks the file for the first who answered
-		connector.send(src,msg_file_req(file_id));
+		int dest;
+		connector.send(dest, msg_file_req(file_id));
 
 		// Receive the file
 		connector.receive(&src,&msg);
@@ -167,7 +170,7 @@ File* Server::readFile(int file_id) {
 }
 
 void Server::listFiles() {
-	// TO DO: how to retrieve a full list of files through servers?
+	// TODO: how to retrieve a full list of files through servers?
 	
 	// temporary: just list local files for now
 	manager.showAll();
@@ -175,14 +178,15 @@ void Server::listFiles() {
 
 void Server::restart() {
 	// TODO: make it select only one machine to receive a given file from.
+	
+	// Tells everyone that you're coming back
 	connector.broadcast(msg_reestart());
 
+	// Receives files from people
 	string src, buffer;
 	while (connector.receive(&src,&buffer)) {
-		File* f = new File();
-		// TODO: this is wrong :P
-		//f->parse_JSON(buffer);
-		//manager.add(f);
+		File *f = new File(buffer);
+		manager.add(f);
 	}
 
 }
@@ -193,7 +197,8 @@ void Server::handleMessage(char *msg) {
 	return;
 
 	// TODO: identify who's the source of the message
-	string src;
+	string srcIp;
+	int srcId;
 
 	Json::Reader reader;
 	Json::Value data;
@@ -236,7 +241,7 @@ void Server::handleMessage(char *msg) {
 				int file_id = data["file_id"].asInt();
 				File *f = manager.read(file_id);
 				if(f)
-					connector.send(src, msg_file_transfer(f));
+					connector.send(srcId, msg_file_transfer(f));
 			}
 			break;
 
@@ -247,7 +252,7 @@ void Server::handleMessage(char *msg) {
 				int file_id = data["file_id"].asInt();
 				File *tmp = manager.read(file_id);
 				if(tmp)
-					connector.send(src, msg_i_has(file_id));
+					connector.send(srcId, msg_i_has(file_id));
 			}
 
 			break;
@@ -258,8 +263,19 @@ void Server::handleMessage(char *msg) {
 
 		case 3:
 			// reestart
-
-			// TODO: implement me!
+			{
+				// Checks locally if I have any files that should be also owned by 'src'
+				// If yes, send it to him.
+				vector<File*> files = manager.getAll();
+				for (unsigned int i = 0; i < files.size(); ++i) {
+					for (unsigned int k = 0; k < files[i]->owners.size(); ++k) {
+						if (files[i]->owners[k] == srcId) {
+							connector.send(srcId, msg_file_transfer(files[i]));
+							break;
+						}
+					}
+				}
+			}
 
 			break;
 
@@ -270,7 +286,7 @@ void Server::handleMessage(char *msg) {
 		case 5:
 			// alive?
 
-			connector.send(src, msg_aliveA());
+			connector.send(srcId, msg_aliveA());
 
 			break;
 
@@ -285,12 +301,22 @@ void Server::handleMessage(char *msg) {
 
 		case 7: 
 			// new_file
-			//newFile(data["title"].asString(), data["content"].asString(), data["owners"]);
+			{
+				vector<int> owners;
+				for (unsigned int i = 0; i < data["owners"].size(); ++i)
+					owners.push_back(data["owners"][i].asInt());
+				newFile(data["title"].asString(), data["content"].asString(), owners);
+			}
 			break;
 
 		case 8:
 			// update_file
-			//updateFile(data["file_id"].asInt(), data["title"].asString(), data["content"].asString(),data["owners"]);
+			{
+				vector<int> owners;
+				for (unsigned int i = 0; i < data["owners"].size(); ++i)
+					owners.push_back(data["owners"][i].asInt());
+				updateFile(data["file_id"].asInt(), data["title"].asString(), data["content"].asString(), owners);
+			}
 			break;
 
 		case 9:
@@ -302,7 +328,7 @@ void Server::handleMessage(char *msg) {
 			// read_file
 			{
 				File* f = readFile(data["file_id"].asInt());
-				// TODO: do something with it (send it back?)
+				// TODO: do something with it (send it back to the Interface?)
 			}
 			break;
 
@@ -312,7 +338,8 @@ void Server::handleMessage(char *msg) {
 		//////////////////////
 
 		case 11:
-			// f_
+			// file_transfer
+			// TODO: what to do???
 			break;
 
 		default:

@@ -3,6 +3,7 @@
 #include "File.h"
 #include <stdexcept>
 #include <map>
+#include <vector>
 
 using namespace std;
 
@@ -11,15 +12,16 @@ class FilesManager {
 
 	public:
 		FilesManager() {}
-		void add(File *file);
+		bool add(File *file);
 		
-		/* DEBUG */
 		void showAll();	
-		
 		void erase(int file_id);
 		void erase(File *file);
-		
 		File* read(int id);
+
+		int countFiles();
+
+		vector<File*> getAll();
 
 		void modify(int id, std::string title, std::string content);
 

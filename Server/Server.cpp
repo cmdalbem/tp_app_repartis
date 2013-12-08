@@ -21,6 +21,7 @@ void Server::configure() {
 	// Initialize unique file ID
 	lastFileId = 0;
 
+
 	ifstream file;
 	file.open(this->configFile.c_str());
 	if (! file.is_open()) {
@@ -71,6 +72,7 @@ int Server::getNewFileId()
 
 	// If machineId is '127001' and lastFileId is '666', then newFileId => 127001666
 	int newFileId = machineId * pow(10,COUNT_DIGITS(lastFileId)) + lastFileId;
+	
 	return newFileId;
 }
 
@@ -86,6 +88,7 @@ void *newFile(void *arguments) {
 
 	// Create new file
 	File* f = new File(me->getNewFileId(), title, content, owners);
+	me->incrementLastFileId();
 	fileMsg = me->msg_file_transfer(f);
 
 	// Finds out who is alive
@@ -95,14 +98,12 @@ void *newFile(void *arguments) {
 	string src;
 	for (unsigned int i = 0; i < me->nbMaxErrors+1; ++i) {
 		// Send the file for the first K+1 guys who answers
-		while(!me->retrieveMessage(&buffer,"file_transfer"));
+		while(!me->retrieveMessage(&buffer,"alive!"));
 		me->connector.send(buffer.src,fileMsg);
 	}
 
-	// Add file locally
+	// Add file to local store
 	me->manager.add(f);
-
-	me->incrementLastFileId();
 
 	return 0;
 }
@@ -119,7 +120,7 @@ void *updateFile(void *arguments) {
 	// Asks who has the file
 	me->connector.broadcast(me->msg_who_has(file_id));
 
-	// Waits until someone answers
+	// Send the file to everyone that has the file
 	File* f = new File(file_id, title, content, owners);
 	string msg = me->msg_file_transfer(f);
 
@@ -129,7 +130,7 @@ void *updateFile(void *arguments) {
 	while(me->retrieveMessage(&buffer,string("i_has"),ss.str()))
 		me->connector.send(buffer.src, msg);
 
-	// Check if the file is available locally
+	// Check if the file is available locally. If it is, update it
 	File* file = me->manager.read(file_id);
 	if(file)
 		me->manager.modify(file_id, title, content);
@@ -170,10 +171,11 @@ void *readFile(void* arguments) {
 		// Asks who has the file
 		me->connector.broadcast(me->msg_who_has(file_id));
 
-		// Waits until someone answers
 		MessageStoreNode buffer;
 		stringstream ss;
 		ss << file_id;
+		
+		// Waits until someone answers
 		while(!me->retrieveMessage(&buffer,string("i_has"),ss.str()));
 
 		// Asks the file for the first who answered
@@ -186,8 +188,8 @@ void *readFile(void* arguments) {
 		file->parse_JSON(buffer.content);
 	}
 
-	// TODO: wut
-	//return file;
+	// TODO: send the file to Interface (has to remember his IP...)
+
 	return 0;
 }
 
@@ -196,9 +198,8 @@ void *listFiles(void* arg) {
 	Server *me = (Server*) arg;
 
 	// TODO: how to retrieve a full list of files through servers?
-	
-	// temporary: just list local files for now
-	me->manager.showAll();
+
+	// TODO: send the files to Interface (has to remember his IP...)	
 
 	return 0;
 }
@@ -207,7 +208,7 @@ void *restart(void* arg) {
 	// Parse arguments
 	Server *me = (Server*) arg;
 
-	// TODO: make it select only one machine to receive a given file from.
+	// OPTIMIZE: make it select only one machine to receive a given file from.
 	
 	// Tells everyone that you're coming back
 	me->connector.broadcast(me->msg_reestart());
@@ -219,22 +220,38 @@ void *restart(void* arg) {
 		me->manager.add(f);
 	}
 
+	// Nice, now we're back! :)
+
 	return 0;
 }
 
-// Message Queue managing
+
+/////////////////////////////
+// Message Buffer managing //
+/////////////////////////////
+
 void Server::pushMessage(int src, string msg) {
 	pushMessage(src,msg,"");
 }
 
 void Server::pushMessage(int src, string msg, string content) {
 	pthread_mutex_lock(&msgsBufferMutex);
+		bool wasEmpty = msgsBuffer.empty();
 		msgsBuffer.push_back({src,msg,content});
+		if(wasEmpty) {
+			// Wakes up everybody that was sleeping waiting for messages
+			pthread_cond_signal(&msgsBufferCond);
+		}
 	pthread_mutex_unlock(&msgsBufferMutex);
 }
 
 bool Server::retrieveMessage(MessageStoreNode *ret, string type) {
 	pthread_mutex_lock(&msgsBufferMutex);
+		if(msgsBuffer.empty()) {
+			// If queue is empty then releases the mutex and sleep until it's not anymore
+			pthread_cond_wait(&msgsBufferCond,&msgsBufferMutex);
+		}
+
 		for (unsigned int i = 0; i < msgsBuffer.size(); ++i) {
 			if (msgsBuffer[i].type.compare(type) == 0) {
 				*ret = msgsBuffer[i];
@@ -274,6 +291,11 @@ bool Server::retrieveMessage(MessageStoreNode *ret, int src, string type) {
 	pthread_mutex_unlock(&msgsBufferMutex);
 	return false;
 }
+
+
+//////////////////////
+// Message Handling //
+//////////////////////
 
 void Server::handleMessage(char *msg) {
 	cout<<"handleMessage: " << msg  << endl;
@@ -469,7 +491,8 @@ void Server::handleMessage(char *msg) {
 		case 11:
 			// file_transfer
 			// Push into the msgs buffer
-			pushMessage(srcId,data["type"].asString(),data["fileJson"].asString());
+			// TODO: what to do when receiving a file?
+			pushMessage(srcId, data["type"].asString(), data["fileJson"].asString());
 			break;
 
 		default:
@@ -479,6 +502,9 @@ void Server::handleMessage(char *msg) {
 	return;	
 }
 
+////////////////////////////////////////////
+// Helper functions for creating messages //
+////////////////////////////////////////////
 
 string Server::msg_file_req(int file_id) {
 	Json::Value data;
@@ -547,7 +573,7 @@ string Server::msg_file_transfer(string fileJson) {
 	data["fileJson"] = fileJson;
 	
 	Json::StyledWriter writer;
-
+}
 string Server::msg_file_transfer(File* f) {
 	Json::Value data;
 

@@ -56,10 +56,7 @@ Server::~Server() {
 }
 
 void Server::ping() {
-	cout << "Sending a ping" << endl;
-	Event event = Event(Ping,"Ping");
-	this->connector.senders[0]->threadedSender->update(event);
-	cout << "Send the ping" << endl;
+	this->connector.send(0,"youhou server 0");
 }
 
 //////////////////////

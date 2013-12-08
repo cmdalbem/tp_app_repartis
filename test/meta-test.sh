@@ -18,7 +18,7 @@ for word in $(cat $1); do
 		cat "machine/$word" > entryTmp
 	else 
 		even="True"
-		echo "./../Interface/res < entryTmp > log$i 2>&1" > tmp.sh
+		echo "./../CreateServer/res < entryTmp > log$i 2>&1" > tmp.sh
 		gnome-terminal -x ./tmp.sh 
 		sleep 1
 	fi

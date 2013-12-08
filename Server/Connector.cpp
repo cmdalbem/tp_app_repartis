@@ -35,8 +35,6 @@ void Connector::initialize(unsigned int nbMaxSenders,string listIpAdress[], unsi
 		}
 		if (change) {
 			printf("Client(s) connected\n");
-			Event event = Event(Ping,"ping");
-			senders[0]->threadedSender->update(event);
 		}
 	}
 
@@ -65,7 +63,7 @@ void Connector::send(int destId, string msg) {
 	offset = (machineId < destId) ? -1 : 0;
 	if (destId < senders.size()) {
 		Event e(Ping, msg);
-		senders[destId + offset]->update(e);
+		senders[destId + offset]->threadedSender->update(e);
 	} else {
 		fprintf(stderr, "Envoie à ID inexistant : %i\n", destId);
 		exit(0);

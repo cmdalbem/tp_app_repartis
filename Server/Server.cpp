@@ -197,4 +197,75 @@ void Server::reestart() {
 void Server::handleMessage(char *msg) {
 	cout<<"handleMessage: " << msg  <<endl;
 	ping();
+
+	const int n = 13;
+	const char *msgs[] = {"file_req","who_has","i_has","reestart",
+						  "del","alive?","alive!","new_file","update_file",
+						  "delete_file","read_file","f_"};
+	int type=-1;
+
+	// Finds out which kind of message it is
+	for (int i = 0; i < n; ++i) {
+		if (strncmp(msg,msgs[i],strlen(msgs[i]))==0) {
+			type = i;
+			break;
+		}
+	}
+
+	cout << "Received message of type " << type << endl;
+
+	switch(type) {
+		case 0:
+			// file_req
+			break;
+
+		case 1:
+			// who_has
+			break;
+
+		case 2:
+			// i_has
+			break;
+
+		case 3:
+			// reestart
+			break;
+
+		case 4:
+			// del
+			break;
+
+		case 5:
+			// alive?
+			break;
+
+		case 6:
+			// alive!
+			break;
+
+		case 7:
+			// new_file
+			break;
+
+		case 8:
+			// update_file
+			break;
+
+		case 9:
+			// delete_file
+			break;
+
+		case 10:
+			// read_file
+			break;
+
+		case 11:
+			// f_
+			break;
+
+		default:
+			break;
+	}
+
+	return;	
 }

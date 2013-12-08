@@ -38,7 +38,7 @@ void Receiver::initialize(int portNo) {
 	listen(this->sockfd, 5);
 	this->clilen = sizeof(this->cli_addr);
 }
-
+	
 // try to accept incoming connection 
 void Receiver::connectServer() {
 	// wait until a client connects to the server
@@ -84,6 +84,7 @@ void *Receiver::processWrapper(void *context) {
 // everything needed to run a server 
 void *Receiver::run() {
 	initialize(this->portNo);
+	int pid;
 	// while true listen. Good student		  	
 	while(1) {
 		// listen to the socket

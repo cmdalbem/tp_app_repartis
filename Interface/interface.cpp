@@ -5,6 +5,7 @@
 #include "interface.h"
 #include <Sender.h>
 #include <ClientReceiver.h>
+#include <Event.h>
 
 using namespace std;
 
@@ -20,8 +21,6 @@ void initialize() {
 	}
 }
 
-// Globals
-Server *server = NULL;
 
 int main(void) {
 	int command;
@@ -30,13 +29,6 @@ int main(void) {
 	bool exit = false;
 
 	while (not exit) {
-
-		// Connects to a server
-		while (server==NULL)
-			connectToServer();
-		// Server is connected, we can start playing with files
-		cout << "connectedToServer ended" << endl;
-		continue;
 
 		cout << "(1) to create a file\n"
 			"(2) to delete a file\n"
@@ -74,43 +66,6 @@ int main(void) {
 	}
 }
 
-void connectToServer()
-{
-	string ip, port;
-
-//	cout << "Please enter the server IP: ";
-//	cin >> ip;
-	ip = "localhost";
-
-	cout << "Please enter the id (<10): ";
-	cin >> port;
-	int machineId = port[0] - '0';
-	cout << "Please enter the port number: ";
-	cin >> port;
-	int portNo = 5020 + port[0] - '0';
-	cout << portNo << endl;
-	cout << "Enter the number of machines (<10)" << endl;
-	cin >> port;
-	int nbMachine = port[0] - '0';
-	unsigned int clientPort[10];
-	for (int i = 0; i < nbMachine - 1; i++) {
-		cout << "Please enter the clients port number: ";
-		cin >> port;
-		clientPort[i] = 5020 + port[0] - '0';
-	}
-	
-	cout << "The machine " << machineId << " on port ";
-	cout << portNo << " talks to";
-	for (int i = 0; i < nbMachine - 1; i++) {
-		cout << " " << clientPort[i];
-	} 
-	cout << "." << endl;
-	
-	// Connect to server
-	string tmp[] = {"localhost", "localhost"};
-	server = new Server(machineId, ip, tmp, clientPort, portNo);
-}
-
 void createFile()
 {
 	string title, content;
@@ -119,13 +74,9 @@ void createFile()
 	cin >> title;
 	cout << "content: " << endl;
 	cin >> content;
-	string msg=;
+	string msg="";
 	Event event=Event(CreateFile,msg);
 	sender.update(event);
-
-	vector<int> owners;
-	owners.push_back(server->getId());
-	server->newFile(title, content, owners);
 }
 
 void deleteFile()
@@ -135,10 +86,9 @@ void deleteFile()
 
 	cout << "id of the file: " << endl;
 	cin >> id;
+	string msg="";
 	Event event=Event(DeleteFile,msg);
 	sender.update(event);
-
-	server->deleteFile(id);
 }
 
 void readFile()
@@ -147,6 +97,7 @@ void readFile()
 
 	cout << "id of the file: " <<endl;
 	cin >> id;
+	string msg="";
 	Event event=Event(ReadFile,msg);
 	sender.update(event);
 
@@ -154,9 +105,8 @@ void readFile()
 
 void modifyFile()
 {
-	int id, nowners;
+	int id;
 	string title, content;
-	vector<int> owners;
 		
 	cout << "id of the file: " << endl;
 	cin >> id;
@@ -164,13 +114,14 @@ void modifyFile()
 	cin >> title;
 	cout << "content of the file: " << endl;
 	cin >> content;
-	Event event=Event(modifyFile,msg);
+	string msg="";
+	Event event=Event(ModifyFile,msg);
 	sender.update(event);
 }
 
 void showFiles()
-	Event event=Event(showFiles,msg);
-	sender.update(event);
 {
-	server->listFiles();
+	string msg="";
+	Event event=Event(ShowFiles,msg);
+	sender.update(event);
 }

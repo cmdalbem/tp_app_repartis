@@ -35,8 +35,6 @@ void Connector::initialize(unsigned int nbMaxSenders,string listIpAdress[], unsi
 		}
 		if (change) {
 			printf("Client(s) connected\n");
-			Event event = Event(Ping,"ping");
-			senders[0]->threadedSender->update(event);
 		}
 	}
 

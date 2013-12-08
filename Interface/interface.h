@@ -4,6 +4,8 @@
 
 #include <Sender.h>
 
+void connectToServer();
+
 void createFile();
 
 void deleteFile();

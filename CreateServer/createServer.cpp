@@ -5,9 +5,8 @@ void connectToServer()
 {
 	string ip, port;
 
-//	cout << "Please enter the server IP: ";
-//	cin >> ip;
-	ip = "localhost";
+	cout << "Please enter the server IP: ";
+	cin >> ip;
 
 	cout << "Please enter the id (<10): ";
 	cin >> port;
@@ -20,7 +19,11 @@ void connectToServer()
 	cin >> port;
 	int nbMachine = port[0] - '0';
 	unsigned int clientPort[10];
+	vector<string> client_ip;
+	string tmp;
 	for (int i = 0; i < nbMachine - 1; i++) {
+		cout << "Please enter the clients ip adress: ";
+		cin >> tmp; client_ip.push_back(tmp);
 		cout << "Please enter the clients port number: ";
 		cin >> port;
 		clientPort[i] = 5020 + port[0] - '0';
@@ -34,8 +37,7 @@ void connectToServer()
 	cout << "." << endl;
 	
 	// Connect to server
-	string tmp[] = {"localhost", "localhost"};
-	new Server(machineId, ip, tmp, clientPort, portNo);
+	new Server(machineId, ip, client_ip, clientPort, portNo);
 }
 int main(void) {
 	connectToServer();

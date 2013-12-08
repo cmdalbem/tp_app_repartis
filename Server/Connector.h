@@ -17,15 +17,13 @@ class Server;
 
 class Connector {
 public:
-	void initialize(unsigned int nbMaxSenders,string listIpAdress[], unsigned int senderPortNo[]);
+	void initialize(unsigned int nbMaxSenders,vector<string> listIpAdress, unsigned int senderPortNo[]);
 	Connector() {};
 	Connector(Server *pserver);
-	Connector(int machineId, unsigned int nbMaxSenders, string listIpAdress[], unsigned int senderPortNo[], unsigned int portNo, Server *pserver);
+	Connector(int machineId, unsigned int nbMaxSenders, vector<string> listIpAdress, unsigned int senderPortNo[], unsigned int portNo, Server *pserver);
 	~Connector();
 
 	void send(int id, string msg);
-	// Blocking receive. Returns "false" if timeout.
-	bool receive(string *src, string *msg, float timeout=DEFAULT_TIMEOUT);
 	void broadcast(string msg);
 	
 	void addConnection(string ip);
@@ -38,10 +36,11 @@ public:
 	int getMachineId() {
 		return machineId;
 	}
-	int isInListIp(string ip) {
-		return this->listIp.count(ip);
+	bool isBlacklisted(string ip) {
+		return (this->listIp.count(ip) || !this->firstConnectionComplete);
 	}
 private:
+	bool firstConnectionComplete;
 	set<string> listIp;
 	int machineId;
 	map<int,Sender *> senders;

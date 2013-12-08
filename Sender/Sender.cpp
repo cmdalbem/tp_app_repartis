@@ -145,9 +145,9 @@ int Sender::SenderMain(string hostName,int portNo) {
 
 void Sender::update(Event& what) {
 	pthread_mutex_lock(&m);
-	bool emptyQueue = eventQueue.empty();
+	bool wasEmpty = eventQueue.empty();
 	this->eventQueue.push_back(what);
-	if (emptyQueue) {
+	if (wasEmpty) {
 		pthread_cond_signal(&c);
 	}
 	pthread_mutex_unlock(&m);

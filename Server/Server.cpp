@@ -92,10 +92,11 @@ void Server::newFile(string title, string content, vector<int> owners) {
 
 	// Replicate it in the network
 	string src;
+	int dest;
 	for (unsigned int i = 0; i < nbMaxErrors+1; ++i) {
 		// Send the file for the first K+1 guys who answers
 		connector.receive(&src,&buffer);
-		connector.send(src,fileMsg);
+		connector.send(dest,fileMsg);
 	}
 
 	// Add file locally
@@ -115,8 +116,9 @@ void Server::updateFile(int file_id, string title, string content, vector<int> o
 	File* f = new File(file_id, title, content, owners);
 	string msg = msg_file_transfer(f);
 
+	int dest;
 	while (connector.receive(&src,&buffer))
-		connector.send(src,msg);
+		connector.send(dest, msg);
 
 	// Check if the file is available locally
 	File* file = manager.read(file_id);
@@ -156,7 +158,8 @@ File* Server::readFile(int file_id) {
 		connector.receive(&src,&msg);
 
 		// Asks the file for the first who answered
-		connector.send(src,msg_file_req(file_id));
+		int dest;
+		connector.send(dest, msg_file_req(file_id));
 
 		// Receive the file
 		connector.receive(&src,&msg);
@@ -197,6 +200,7 @@ void Server::handleMessage(char *msg) {
 
 	// TODO: identify who's the source of the message
 	string src;
+	int dest;
 
 	Json::Reader reader;
 	Json::Value data;
@@ -239,7 +243,7 @@ void Server::handleMessage(char *msg) {
 				int file_id = data["file_id"].asInt();
 				File *f = manager.read(file_id);
 				if(f)
-					connector.send(src, msg_file_transfer(f));
+					connector.send(dest, msg_file_transfer(f));
 			}
 			break;
 
@@ -250,7 +254,7 @@ void Server::handleMessage(char *msg) {
 				int file_id = data["file_id"].asInt();
 				File *tmp = manager.read(file_id);
 				if(tmp)
-					connector.send(src, msg_i_has(file_id));
+					connector.send(dest, msg_i_has(file_id));
 			}
 
 			break;
@@ -273,7 +277,7 @@ void Server::handleMessage(char *msg) {
 		case 5:
 			// alive?
 
-			connector.send(src, msg_aliveA());
+			connector.send(dest, msg_aliveA());
 
 			break;
 

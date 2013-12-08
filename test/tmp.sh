@@ -1,1 +1,1 @@
-./../Interface/res < entryTmp > log0000000000000000000000000000000000000000000000000000000000000000 2>&1
+./../Interface/res < entryTmp > log3 2>&1

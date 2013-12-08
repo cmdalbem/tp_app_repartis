@@ -1,4 +1,5 @@
 #include "Sender.h"
+#include <sstream>
 using namespace std;
 
 // simple constructor with default value
@@ -98,7 +99,6 @@ void Sender::treatEvent(Event& event)
 	if (event.getType() == Ping) {
 		bzero(buffer,256);
 		sprintf(buffer,event.getMessage().c_str());
-		cout << "writing the message" <<endl;
 		this->writeMessage(buffer);
 	}
 
@@ -116,9 +116,7 @@ void *Sender::run() {
 	while(1) {
 		// initialize & read into the buffer
 		this->getEvent(event);
-		cout<<"got out of getEvent"<<endl;
 		this->treatEvent(event);
-		cout<<"handled the event" <<endl;
 		sleep(5);
 	}
 
@@ -165,7 +163,12 @@ void Sender::getEvent(Event& event) {
 		pthread_cond_wait(&c,&m);
 	}
 	event = eventQueue.front(); 
-	cout << "got the event " << event.getMessage() << endl; 
+
+	stringstream ss;
+	ss << "from 502"<<this->machineId << " to "<< this->portNo;
+	string id = ss.str();
+	event.setMessage("Message " + id + " " + event.getMessage());
+	cout << "Sending Message " << id << " " << event.getMessage() << endl; 
 	eventQueue.pop_front();
 	pthread_mutex_unlock(&m);
 }

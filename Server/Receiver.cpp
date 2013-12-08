@@ -84,7 +84,7 @@ void *Receiver::processWrapper(void *context) {
 // everything needed to run a server 
 void *Receiver::run() {
 	initialize(this->portNo);
-	int pid;
+	//int pid;
 	// while true listen. Good student		  	
 	while(1) {
 		// listen to the socket

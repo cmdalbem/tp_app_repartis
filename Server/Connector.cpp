@@ -70,15 +70,6 @@ void Connector::send(int destId, string msg) {
 	}
 }
 
-bool Connector::receive(string *src, string *msg, float timeout) {
-	//...
-
-	// returns "false" if timeout
-	return false;
-
-	return true;
-}
-
 void Connector::broadcast(string msg) {
 	//...
 	msg = msg;

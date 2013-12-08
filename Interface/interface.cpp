@@ -94,7 +94,6 @@ void connectToServer()
 	
 	// Connect to server
 	string tmp[] = {"localhost", "localhost"};
-	server = new Server(machineId, ip, tmp, clientPort, portNo);
 }
 
 void createFile()
@@ -108,7 +107,6 @@ void createFile()
 
 	vector<int> owners;
 	owners.push_back(server->getId());
-	server->newFile(title, content, owners);
 }
 
 void deleteFile()
@@ -119,7 +117,6 @@ void deleteFile()
 	cout << "id of the file: " << endl;
 	cin >> id;
 
-	server->deleteFile(id);
 }
 
 void readFile()
@@ -152,10 +149,9 @@ void modifyFile()
 		cin >> ownerTmp;
 		owners.push_back(ownerTmp);
 	}
-	server->updateFile(id, title, content, owners);
 }
 
 void showFiles()
 {
-	server->listFiles();
+
 }

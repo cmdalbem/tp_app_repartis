@@ -5,6 +5,7 @@
 #include "Server.h"
 #include <cmath>
 #include <fstream>
+#include <sstream>
 
 #include <jsoncpp/json.h>
 
@@ -13,9 +14,9 @@ using namespace std;
 const string Server::configFile = "system.cfg";
 
 void Server::configure() {
-	// Initialize the msgQueue mutex
-	pthread_mutex_init(&msgQueueMutex, NULL);
-	pthread_cond_init(&msgQueueCond, NULL);
+	// Initialize the msgsBuffer mutex
+	pthread_mutex_init(&msgsBufferMutex, NULL);
+	pthread_cond_init(&msgsBufferCond, NULL);
 
 	// Initialize unique file ID
 	lastFileId = 0;
@@ -80,7 +81,7 @@ void *newFile(void *arguments) {
 	string content = args->content;
 	vector<int> owners = args->owners;
 
-	string buffer;
+	MessageStoreNode buffer;
 	string fileMsg;
 
 	// Create new file
@@ -92,11 +93,10 @@ void *newFile(void *arguments) {
 
 	// Replicate it in the network
 	string src;
-	int dest;
 	for (unsigned int i = 0; i < me->nbMaxErrors+1; ++i) {
 		// Send the file for the first K+1 guys who answers
-		me->connector.receive(&src,&buffer);
-		me->connector.send(dest,fileMsg);
+		while(!me->retrieveMessage(&buffer,"file_transfer"));
+		me->connector.send(buffer.src,fileMsg);
 	}
 
 	// Add file locally
@@ -116,9 +116,6 @@ void *updateFile(void *arguments) {
 	string content = args->content;
 	vector<int> owners = args->owners;
 
-	string buffer;
-	string src;
-
 	// Asks who has the file
 	me->connector.broadcast(me->msg_who_has(file_id));
 
@@ -126,9 +123,11 @@ void *updateFile(void *arguments) {
 	File* f = new File(file_id, title, content, owners);
 	string msg = me->msg_file_transfer(f);
 
-	int dest;
-	while (me->connector.receive(&src,&buffer))
-		me->connector.send(dest, msg);
+	MessageStoreNode buffer;
+    stringstream ss;
+    ss << file_id;
+	while(me->retrieveMessage(&buffer,string("i_has"),ss.str()))
+		me->connector.send(buffer.src, msg);
 
 	// Check if the file is available locally
 	File* file = me->manager.read(file_id);
@@ -168,24 +167,23 @@ void *readFile(void* arguments) {
 	// Check if the file is available locally
 	file = me->manager.read(file_id);
 	if(!file) {
-		string msg;
-
 		// Asks who has the file
 		me->connector.broadcast(me->msg_who_has(file_id));
 
 		// Waits until someone answers
-		string src;
-		me->connector.receive(&src,&msg);
+		MessageStoreNode buffer;
+		stringstream ss;
+		ss << file_id;
+		while(!me->retrieveMessage(&buffer,string("i_has"),ss.str()));
 
 		// Asks the file for the first who answered
-		int dest;
-		me->connector.send(dest, me->msg_file_req(file_id));
+		me->connector.send(buffer.src, me->msg_file_req(file_id));
 
 		// Receive the file
-		me->connector.receive(&src,&msg);
+		while(!me->retrieveMessage(&buffer,string("file_transfer")));
 
 		file = new File();
-		file->parse_JSON(msg);
+		file->parse_JSON(buffer.content);
 	}
 
 	// TODO: wut
@@ -215,13 +213,66 @@ void *restart(void* arg) {
 	me->connector.broadcast(me->msg_reestart());
 
 	// Receives files from people
-	string src, buffer;
-	while (me->connector.receive(&src,&buffer)) {
-		File *f = new File(buffer);
+	MessageStoreNode buffer;
+	while (me->retrieveMessage(&buffer,"file_transfer")) {
+		File *f = new File(buffer.content);
 		me->manager.add(f);
 	}
 
 	return 0;
+}
+
+// Message Queue managing
+void Server::pushMessage(int src, string msg) {
+	pushMessage(src,msg,"");
+}
+
+void Server::pushMessage(int src, string msg, string content) {
+	pthread_mutex_lock(&msgsBufferMutex);
+		msgsBuffer.push_back({src,msg,content});
+	pthread_mutex_unlock(&msgsBufferMutex);
+}
+
+bool Server::retrieveMessage(MessageStoreNode *ret, string type) {
+	pthread_mutex_lock(&msgsBufferMutex);
+		for (unsigned int i = 0; i < msgsBuffer.size(); ++i) {
+			if (msgsBuffer[i].type.compare(type) == 0) {
+				*ret = msgsBuffer[i];
+				msgsBuffer.erase(msgsBuffer.begin()+i);
+				pthread_mutex_unlock(&msgsBufferMutex);
+				return true;
+			}
+		}
+	pthread_mutex_unlock(&msgsBufferMutex);
+	return false;
+}
+
+bool Server::retrieveMessage(MessageStoreNode *ret, string type, string content) {
+	pthread_mutex_lock(&msgsBufferMutex);
+		for (unsigned int i = 0; i < msgsBuffer.size(); ++i) {
+			if (msgsBuffer[i].type.compare(type) == 0 && msgsBuffer[i].content.compare(content)==0) {
+				*ret = msgsBuffer[i];
+				msgsBuffer.erase(msgsBuffer.begin()+i);
+				pthread_mutex_unlock(&msgsBufferMutex);
+				return true;
+			}
+		}
+	pthread_mutex_unlock(&msgsBufferMutex);
+	return false;
+}
+
+bool Server::retrieveMessage(MessageStoreNode *ret, int src, string type) {
+	pthread_mutex_lock(&msgsBufferMutex);
+		for (unsigned int i = 0; i < msgsBuffer.size(); ++i) {
+			if (msgsBuffer[i].type.compare(type) == 0 && msgsBuffer[i].src==src) {
+				*ret = msgsBuffer[i];
+				msgsBuffer.erase(msgsBuffer.begin()+i);
+				pthread_mutex_unlock(&msgsBufferMutex);
+				return true;
+			}
+		}
+	pthread_mutex_unlock(&msgsBufferMutex);
+	return false;
 }
 
 void Server::handleMessage(char *msg) {
@@ -292,6 +343,8 @@ void Server::handleMessage(char *msg) {
 
 		case 2:
 			// i_has
+			// Push into the msgs buffer
+			pushMessage(srcId,data["type"].asString(),data["file_id"].asString());
 			break;
 
 		case 3:
@@ -325,6 +378,8 @@ void Server::handleMessage(char *msg) {
 
 		case 6:
 			// alive!
+			// Push into the msgs buffer
+			pushMessage(srcId,data["type"].asString());
 			break;
 
 
@@ -413,7 +468,8 @@ void Server::handleMessage(char *msg) {
 
 		case 11:
 			// file_transfer
-			// TODO: what to do???
+			// Push into the msgs buffer
+			pushMessage(srcId,data["type"].asString(),data["fileJson"].asString());
 			break;
 
 		default:

@@ -20,8 +20,6 @@ public:
 	~Connector();
 
 	void send(int id, string msg);
-	// Blocking receive. Returns "false" if timeout.
-	bool receive(string *src, string *msg, float timeout=DEFAULT_TIMEOUT);
 	void broadcast(string msg);
 	
 	void addConnection(string ip);

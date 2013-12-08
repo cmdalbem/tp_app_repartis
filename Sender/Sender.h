@@ -33,6 +33,8 @@ public:
 	void getEvent(Event& event); 
 	void treatEvent(Event& event);
 
+	// object used in the thread
+	Sender *threadedSender;
 private:
 	// set the port number
 	void setPortNo(int portNo);
@@ -51,6 +53,8 @@ private:
 	// used to signal an error & quit the thread
 	void error(const char * msg); 
 
+	// indicates wheter the Sender is connected or not
+	bool connected;
 	// id of the machine using the Sender
 	int machineId;
 	// defines the file descriptor of the socket
@@ -61,10 +65,6 @@ private:
 	struct sockaddr_in servAddr;
 	// pointer to the computer hosting the server
 	struct hostent *server;
-	// object used in the thread
-	Sender *threadedSender;
-	// indicates wheter the Sender is connected or not
-	bool connected;
 
 	list<Event> eventQueue;
 	pthread_mutex_t m;

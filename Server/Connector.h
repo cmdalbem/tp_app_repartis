@@ -26,7 +26,7 @@ public:
 	void addConnection(string ip);
 	
 
-	vector<Sender> senders;
+	vector<Sender *> senders;
 
 private:
 	Receiver receiver;

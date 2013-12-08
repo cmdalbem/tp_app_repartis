@@ -41,11 +41,13 @@ Server::Server(string ip) {
 
 
 Server::Server(int machineId, string ip, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo) {
+	cout << "entering Server" << endl;
 	configure();
 	this->ip = ip;
 	this->machineId = machineId;
 	// do the complex server/client initializations here 
 	Connector(machineId, nbMaxClients, listIpAdress, clientPortNo, portNo, this);
+	cout << "quitting Server" << endl;
 } 
 
 Server::~Server() {	
@@ -69,6 +71,7 @@ int Server::getNewFileId()
 
 	// If machineId is '127001' and lastFileId is '666', then newFileId => 127001666
 	int newFileId = machineId * pow(10,COUNT_DIGITS(lastFileId)) + lastFileId;
+	return newFileId;
 }
 
 //File* Server::newFile(string title, string content) {
@@ -86,7 +89,7 @@ void Server::newFile(string title, string content) {
 
 	// Replicate it in the network
 	string src;
-	for (int i = 0; i < nbMaxErrors+1; ++i) {
+	for (unsigned int i = 0; i < nbMaxErrors+1; ++i) {
 		// Send the file for the first K+1 guys who answers
 		connector.receive(&src,&msg);
 		connector.send(src,msg);
@@ -192,5 +195,4 @@ void Server::reestart() {
 void Server::handleMessage(char *msg) {
 	cout<<"handleMessage"<<endl;
 	ping();
-	return;
 }

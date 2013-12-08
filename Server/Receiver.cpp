@@ -110,7 +110,7 @@ void Receiver::serverMain(int machineId, int portNo) {
 
 	// make a copy of the object to keep the 
 	// field initialized
-	threadedServer = new Receiver(this->server);
+	threadedServer = new Receiver(*this);
 	pthread_create(&t, NULL, &Receiver::runWrapper, threadedServer);
 }
 

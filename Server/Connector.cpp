@@ -4,6 +4,7 @@
 #include "Connector.h"
 #include "Server.h"
 #include "Event.h"
+using namespace std;
 
 Connector::Connector(Server *pserver) {
 	 receiver = Receiver(pserver); 
@@ -14,10 +15,11 @@ Connector::Connector(int machineId, unsigned int nbMaxSenders, string listIpAdre
 	receiver.serverMain(machineId, portNo);		
 	printf("Serveur launched\n");
 
-	for (unsigned int i = 0; i < nbMaxSenders-1; i++) {
-		senders.push_back(Sender(machineId));
+	for (unsigned int i = 0; i < nbMaxSenders-1; ++i) {
+		cout << i+1 << " senders registered of " << nbMaxSenders -1 << endl;
+		senders.push_back(new Sender(machineId));
 	}	
- 
+	cout << "the " << nbMaxSenders << " have been registered" << endl;
 	bool allConnected;
 	bool change;
 	while(1) {
@@ -26,8 +28,9 @@ Connector::Connector(int machineId, unsigned int nbMaxSenders, string listIpAdre
 		while (! allConnected) {
 			allConnected = true;
 			for (unsigned int i = 0; i < nbMaxSenders-1; i++) {
-				if (! senders[i].isConnected()) {
-					senders[i].SenderMain(listIpAdress[i], senderPortNo[i]);	
+				if (! senders[i]->isConnected()) {
+					cout << "connecting a sender" << endl;
+					senders[i]->SenderMain(listIpAdress[i], senderPortNo[i]);	
 					allConnected = false;
 				}
 			}
@@ -41,7 +44,7 @@ Connector::Connector(int machineId, unsigned int nbMaxSenders, string listIpAdre
 		if (change) {
 			printf("Client(s) connected\n");
 			Event event = Event(Ping,"ping");
-			senders[0].update(event);
+			senders[0]->threadedSender->update(event);
 		}
 	}
 }
@@ -69,7 +72,7 @@ void Connector::broadcast(string msg) {
 	//...
 	msg = msg;
 }
-	
+
 void Connector::addConnection(string ip) {
 	//...
 	ip = ip;	

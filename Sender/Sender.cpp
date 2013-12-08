@@ -2,9 +2,11 @@
 using namespace std;
 
 // simple constructor with default value
-Sender::Sender(int id) : connected(false), machineId(id), threadedSender(NULL) 	{
+Sender::Sender(int id) : threadedSender(NULL), connected(false), machineId(id){ 
+	cout << "entering Sender" << endl;
 	pthread_mutex_init(&m, NULL);
 	pthread_cond_init(&c, NULL);
+	cout << "quitting Sender" << endl;
 };
 
 // simple destructor
@@ -139,7 +141,7 @@ int Sender::SenderMain(string hostName,int portNo) {
 	// copy the object for the thread
 	this->threadedSender = new Sender(*this);
 	pthread_t t;
-	pthread_create(&t, NULL, &Sender::runWrapper, this);
+	pthread_create(&t, NULL, &Sender::runWrapper, this->threadedSender);
 	// close the door
 	//this->closeSender();
 	return 0;

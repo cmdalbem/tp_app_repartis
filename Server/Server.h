@@ -3,7 +3,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <queue>
 #include <pthread.h>
 
 #include <jsoncpp/json.h>
@@ -39,6 +38,15 @@ void 	*readFile(void* args); // args = file_args
 void 	*listFiles(void* args); // args = Server*
 void 	*restart(void* args); // args = Server*
 
+// Structure of a message stored in the Buffer. These are messages who doesn't have a specific
+//   action required by who receives it, but might have differente meanings in each algorithm
+//   implementation. So, these messages when received are stored in a buffer, which is consulted
+//   by the algorithms that look for specific types.
+struct MessageStoreNode {
+	int src;
+	string type;
+	string content;
+};
 
 class Server {
 public:
@@ -61,11 +69,11 @@ public:
 
 	void incrementLastFileId() { lastFileId++; }
 
-	// Message writing functions
+	// Protocol message writing functions
 	string msg_file_req(int file_id);
 	string msg_who_has(int file_id);
 	string msg_i_has(int file_id);
-	string msg_reestart();
+	string msg_restart();
 	string msg_del(int file_id);
 	string msg_aliveQ(); //alive?
 	string msg_aliveA(); //alive!
@@ -75,7 +83,16 @@ public:
 	string msg_read_file(int file_id);
 	string msg_file_transfer(string fileJson);
 	string msg_file_transfer(File *f);
+	string msg_add(string fileJson);
+	string msg_add(File *f);
 	
+	// Message Buffer managing
+	void pushMessage(int src, string msg);
+	void pushMessage(int src, string msg, string content);
+	bool retrieveMessage(MessageStoreNode *ret, string type);
+	bool retrieveMessage(MessageStoreNode *ret, string type, string content);
+	bool retrieveMessage(MessageStoreNode *ret, int src, string type);
+
 	// Public getters
 	string getIP() { return ip; }
 	int getId() { return machineId; }
@@ -88,9 +105,9 @@ public:
 private:
 	static const string configFile; 
 
-	queue<string> msgQueue;
-	pthread_mutex_t msgQueueMutex;
-	pthread_cond_t msgQueueCond;
+	vector<MessageStoreNode> msgsBuffer;
+	pthread_mutex_t msgsBufferMutex;
+	pthread_cond_t msgsBufferCond;
 
 	// id of the machine using this server (often = ip)
 	int machineId;

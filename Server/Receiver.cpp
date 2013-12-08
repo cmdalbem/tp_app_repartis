@@ -84,21 +84,25 @@ void *Receiver::processWrapper(void *context) {
 // everything needed to run a server 
 void *Receiver::run() {
 	initialize(this->portNo);
-	int pid;
+	//int pid;
 	// while true listen. Good student		  	
 	while(1) {
 		// listen to the socket
 		cout<<"Waiting for a connection"<<endl;
 		this->connectServer();
 		// new thread to accept other connections	
+		cout << 1 << endl;
 		pthread_t t;
-		string ip_client= inet_ntoa(this->cli_addr.sin_addr);
-		cout << ip_client << endl;
-		if (!this->server->connector.isInListIp(ip_client)) {
-			Sender *s = new Sender(this->server->connector.getMachineId(), inet_ntoa(this->cli_addr.sin_addr));
+		string ip= inet_ntoa(this->cli_addr.sin_addr);
+		int port= this->cli_addr.sin_port;
+		cout << ip << endl;
+		cout << port << endl;
+		if (!this->server->connector.isBlacklisted(ip)) {
+			Sender *s = new Sender(this->server->connector.getMachineId(), ip);
 			this->server->connector.subscribe(s);
 			while (!s->isConnected()) {
-				s->SenderMain(inet_ntoa(this->cli_addr.sin_addr), this->cli_addr.sin_port+1);
+				s->SenderMain(ip, port+1);
+				
 			}
 		}
 		Receiver *threadedReceiver = new Receiver(*this);

@@ -10,7 +10,6 @@ using namespace std;
 // Globals
 Server *server = NULL;
 
-
 int main(void) {
 	int command;
 	
@@ -107,7 +106,9 @@ void createFile()
 	cout << "content: " << endl;
 	cin >> content;
 
-	server->newFile(title, content);
+	vector<int> owners;
+	owners.push_back(server->getId());
+	server->newFile(title, content, owners);
 }
 
 void deleteFile()
@@ -130,13 +131,14 @@ void readFile()
 	
 	File* f = server->readFile(id); 
 	if (f)
-		cout << f->get_content() << endl;
+		cout << f->content << endl;
 }
 
 void modifyFile()
 {
-	int id;
+	int id, nowners;
 	string title, content;
+	vector<int> owners;
 		
 	cout << "id of the file: " << endl;
 	cin >> id;
@@ -144,7 +146,16 @@ void modifyFile()
 	cin >> title;
 	cout << "content of the file: " << endl;
 	cin >> content;
-	server->updateFile(id, title, content);
+	cout << "how many owners?" << endl;
+	cin >> nowners;
+	for (int i = 0; i < nowners; ++i)
+	{
+		int ownerTmp;
+		cout << "owner " << i << ": ";
+		cin >> ownerTmp;
+		owners.push_back(ownerTmp);
+	}
+	server->updateFile(id, title, content, owners);
 }
 
 void showFiles()

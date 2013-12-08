@@ -20,10 +20,11 @@ public:
 
 	// Public getters
 	string getIP() { return ip; }
+	int getId() { return machineId; }
 
 	// Files Management
-	void 	newFile(string title, string content);
-	void 	updateFile(int file_id, string title, string content);
+	void 	newFile(string title, string content, vector<int> owners);
+	void 	updateFile(int file_id, string title, string content, vector<int> owners);
 	void 	deleteFile(int file_id);
 	File* 	readFile(int file_id);
 	void 	listFiles();

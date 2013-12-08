@@ -3,7 +3,7 @@
 #include "FilesManager.h"
 
 void FilesManager::add(File *file) {
-	files.insert(std::pair<int,File *>(file->get_id(), file));
+	files.insert(std::pair<int,File *>(file->id, file));
 }
 
 void FilesManager::showAll() {
@@ -18,7 +18,7 @@ void FilesManager::erase(int file_id) {
 }
 
 void FilesManager::erase(File *file) {
-	files.erase(file->get_id());
+	files.erase(file->id);
 }
 File* FilesManager::read(int id) {
 	File* res;
@@ -40,7 +40,7 @@ void FilesManager::modify(int id, string title, string content) {
 	} catch (const out_of_range& e) {
 		cout << "This file doesn't exist" << endl;
 	}
-	res->set_title(title);
-	res->set_content(content);
+	res->title = title;
+	res->content = content;
 	
 }	

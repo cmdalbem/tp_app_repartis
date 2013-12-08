@@ -2,8 +2,9 @@
 
 #include "FilesManager.h"
 
-void FilesManager::add(File *file) {
-	files.insert(std::pair<int,File *>(file->id, file));
+bool FilesManager::add(File *file) {
+	pair<map<int,File*>::iterator,bool> ret = files.insert(pair<int,File *>(file->id, file));
+	return ret.second;
 }
 
 void FilesManager::showAll() {
@@ -44,3 +45,17 @@ void FilesManager::modify(int id, string title, string content) {
 	res->content = content;
 	
 }	
+
+int FilesManager::countFiles()
+{
+	return files.size();
+}
+
+vector<File*> FilesManager::getAll()
+{	
+	vector<File*> ret;
+	for (map<int,File*>::iterator it = files.begin(); it != files.end(); ++it) 
+		ret.push_back(it->second);
+
+	return ret;
+}

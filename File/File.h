@@ -12,6 +12,11 @@ class File {
 public:
 	File() {}
 
+	File(string json)
+	{
+		parse_JSON(json);
+	}
+
 	File(int id, string title, string content, vector<int> owners)
 	{
 		this->id = id;
@@ -34,7 +39,7 @@ public:
 	 */
 	void to_JSON(string& output_data);
 	int parse_JSON(string json_data);
-
 };
-
 #endif
+
+

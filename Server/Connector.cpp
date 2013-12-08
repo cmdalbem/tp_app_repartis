@@ -48,7 +48,7 @@ Connector::Connector(int machineId, unsigned int nbMaxSenders, string listIpAdre
 
 	for (unsigned int i = 0; i < nbMaxSenders-1; ++i) {
 		cout << i+1 << " senders registered of " << nbMaxSenders -1 << endl;
-		senders.push_back(new Sender(machineId));
+		senders.push_back(new Sender(machineId,listIpAdress[machineId]));
 	}	
 	cout << "the " << nbMaxSenders << " have been registered" << endl;
 }

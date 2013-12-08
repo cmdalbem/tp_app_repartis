@@ -2,11 +2,11 @@
 using namespace std;
 
 // simple constructor with default value
-Sender::Sender(int id) : threadedSender(NULL), connected(false), machineId(id){ 
-	cout << "entering Sender" << endl;
+Sender::Sender(int id, string ip) : threadedSender(NULL), connected(false), machineId(id){ 
+	
+	this->ip = ip;
 	pthread_mutex_init(&m, NULL);
 	pthread_cond_init(&c, NULL);
-	cout << "quitting Sender" << endl;
 };
 
 // simple destructor

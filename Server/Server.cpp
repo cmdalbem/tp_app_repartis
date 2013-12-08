@@ -84,25 +84,29 @@ void *newFile(void *arguments) {
 	vector<int> owners = args->owners;
 
 	MessageStoreNode buffer;
-	string fileMsg;
 
 	// Create new file
 	File* f = new File(me->getNewFileId(), title, content, owners);
 	me->incrementLastFileId();
-	fileMsg = me->msg_add(f);
+	f->owners.push_back(me->getId()); // adds myself to list of owners
 
 	// Finds out who is alive
 	me->connector.broadcast(me->msg_aliveQ());
-
-	// Replicate it in the network
-	string src;
-	for (unsigned int i = 0; i < me->nbMaxErrors+1; ++i) {
-		// Send the file for the first K+1 guys who answers
+	
+	// Collects K ids of who answers
+	for (unsigned int i = 0; i < me->nbMaxErrors; ++i) {
 		while(!me->retrieveMessage(&buffer,"alive!"));
-		me->connector.send(buffer.src,fileMsg);
+		f->owners.push_back(buffer.src);
 	}
+	
+	// Converts file to JSON, now if a correct list of owners
+	string fileMsg = me->msg_add(f);
+	
+	// Sends the file to those guys
+	for (unsigned int i = 1; i < me->nbMaxErrors+1; ++i)
+		me->connector.send(owners[i],fileMsg);
 
-	// Add file to local store
+	// Adds file to local store
 	me->manager.add(f);
 
 	return 0;

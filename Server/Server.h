@@ -41,6 +41,7 @@ private:
 	FilesManager manager;
 	Connector connector;
 
+	// generates the ID for a new file
 	int getNewFileId();
 
 	// id of the machine using this server (often = ip)

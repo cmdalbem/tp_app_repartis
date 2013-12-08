@@ -19,7 +19,7 @@
 class Sender : public Subscriber {
 public:
 	// simple constructor with default value
-	Sender(int id);
+	Sender(int id, string ip);
 	// simple destructor
 	~Sender(); 
 	// return true if the Sender is connected, false otherwise
@@ -67,6 +67,7 @@ private:
 	struct hostent *server;
 
 	list<Event> eventQueue;
+	string ip;
 	pthread_mutex_t m;
 	pthread_cond_t c;
 };

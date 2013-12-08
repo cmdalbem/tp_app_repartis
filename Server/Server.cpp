@@ -176,7 +176,7 @@ void Server::listFiles() {
 	manager.showAll();
 }
 
-void Server::reestart() {
+void Server::restart() {
 	// TODO: make it select only one machine to receive a given file from.
 	
 	// Tells everyone that you're coming back
@@ -192,8 +192,9 @@ void Server::reestart() {
 }
 
 void Server::handleMessage(char *msg) {
-	// TEMP
+	cout<<"handleMessage: " << msg  << endl;
 	ping();
+	return;
 
 	// TODO: identify who's the source of the message
 	string srcIp;

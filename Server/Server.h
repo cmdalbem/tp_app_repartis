@@ -29,7 +29,7 @@ public:
 	File* 	readFile(int file_id);
 	void 	listFiles();
 
-	void reestart();
+	void restart();
 
 	void handleMessage(char *msg);
 	void ping();

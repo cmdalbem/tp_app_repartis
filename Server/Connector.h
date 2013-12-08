@@ -1,6 +1,9 @@
 #ifndef CONNECTOR_H
 #define CONNECTOR_H
 
+#include <string>
+#include <set>
+#include <map>
 #include <iostream>
 #include <vector>
 #include <Sender.h>
@@ -9,6 +12,7 @@
 using namespace std;
 
 #define DEFAULT_TIMEOUT 0.5
+using namespace std;
 class Server;
 
 class Connector {
@@ -25,10 +29,22 @@ public:
 	void broadcast(string msg);
 	
 	void addConnection(string ip);
-	
-	vector<Sender *> senders;
+	void subscribe(Sender* s) { 
+		static int nb=0;
+		senders.insert(std::pair<int,Sender*>(nb,s));
+		 nb++;
+	}
+	void unsubscribe(int id) { senders.erase(id); }
+	int getMachineId() {
+		return machineId;
+	}
+	int isInListIp(string ip) {
+		return this->listIp.count(ip);
+	}
 private:
+	set<string> listIp;
 	int machineId;
+	map<int,Sender *> senders;
 
 	Receiver receiver;
 };

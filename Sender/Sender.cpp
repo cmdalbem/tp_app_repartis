@@ -96,11 +96,9 @@ bool Sender::isConnected() {
 void Sender::treatEvent(Event& event)
 {
 	char buffer[256];
-	if (event.getType() == Ping) {
-		bzero(buffer,256);
-		sprintf(buffer,event.getMessage().c_str());
-		this->writeMessage(buffer);
-	}
+	bzero(buffer,256);
+	sprintf(buffer,event.getMessage().c_str());
+	this->writeMessage(buffer);
 
 }
 
@@ -111,7 +109,7 @@ void *Sender::run() {
 	this->connectSocket();		
 	// buffer used for the communication
 
-	// it's gonna be a long talk
+	// initialisation of the event
 	Event event(Ping,"PING");
 	while(1) {
 		// initialize & read into the buffer

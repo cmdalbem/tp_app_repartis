@@ -491,6 +491,7 @@ string Server::msg_file_transfer(string fileJson) {
 	data["fileJson"] = fileJson;
 	
 	Json::StyledWriter writer;
+}
 
 string Server::msg_file_transfer(File* f) {
 	Json::Value data;

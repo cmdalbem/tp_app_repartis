@@ -15,9 +15,9 @@ ClientReceiver receiver;
 
 void initialize() {
 	receiver=ClientReceiver();
-	receiver.serverMain(1001, 1337);		
+	receiver.serverMain(1001, 5030);		
 	while (!sender.isConnected()) {
-		sender.SenderMain("127.0.0.1",5020);
+		sender.SenderMain("127.0.0.1",5031);
 		sleep(1);
 	}
 }

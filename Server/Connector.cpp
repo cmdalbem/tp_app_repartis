@@ -14,6 +14,9 @@ Connector::Connector(Server *pserver) {
 void Connector::initialize(unsigned int nbMaxSenders,string listIpAdress[], unsigned int senderPortNo[]) {
 	bool allConnected;
 	bool change;
+	for (unsigned int i=0; i<nbMaxSenders-1;i++) {
+		this->listIp.insert(listIpAdress[i]);
+	}
 	while(1) {
 		allConnected = false;
 		change = false;
@@ -45,11 +48,11 @@ Connector::Connector(int machineId, unsigned int nbMaxSenders, string listIpAdre
 
 	receiver=Receiver(pserver);
 	receiver.serverMain(machineId, portNo);		
-	printf("Serveur launched\n");
+	printf("Server launched\n");
 
 	for (unsigned int i = 0; i < nbMaxSenders-1; ++i) {
 		cout << i+1 << " senders registered of " << nbMaxSenders -1 << endl;
-		senders.push_back(new Sender(machineId,listIpAdress[machineId]));
+		this->subscribe(new Sender(machineId,listIpAdress[machineId]));
 	}	
 	cout << "the " << nbMaxSenders << " have been registered" << endl;
 }

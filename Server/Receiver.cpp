@@ -92,6 +92,15 @@ void *Receiver::run() {
 		this->connectServer();
 		// new thread to accept other connections	
 		pthread_t t;
+		string ip_client= inet_ntoa(this->cli_addr.sin_addr);
+		cout << ip_client << endl;
+		if (!this->server->connector.isInListIp(ip_client)) {
+			Sender *s = new Sender(this->server->connector.getMachineId(), inet_ntoa(this->cli_addr.sin_addr));
+			this->server->connector.subscribe(s);
+			while (!s->isConnected()) {
+				s->SenderMain(inet_ntoa(this->cli_addr.sin_addr), this->cli_addr.sin_port+1);
+			}
+		}
 		Receiver *threadedReceiver = new Receiver(*this);
 		pthread_create(&t, NULL, &Receiver::processWrapper, threadedReceiver);
 	}

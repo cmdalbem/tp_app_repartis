@@ -2,6 +2,8 @@
 #include "Connector.h"
 #include "Server.h"
 
+using namespace std;
+
 // initialize the server
 void Receiver::initialize(int portNo) {
 	// define a new socket for internet domain & streaming
@@ -10,6 +12,13 @@ void Receiver::initialize(int portNo) {
 	// test the initialisation
 	if (this->sockfd < 0) 
 		error("ERROR opening socket");
+	int yes=1;
+	//char yes='1'; // use this under Solaris
+
+	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1) {
+		perror("setsockopt");
+		exit(1);
+	}
 	// initialise the buffer. 'cause security
 	bzero((char *) &this->serv_addr, sizeof(this->serv_addr));
 	// set the port number 
@@ -67,6 +76,10 @@ void Receiver::process() {
 		this->server->handleMessage(buffer);
 	}
 }
+void *Receiver::processWrapper(void *context) {
+	((Receiver *) context)->process();
+	return (void *) 0;
+}
 
 // everything needed to run a server 
 void *Receiver::run() {
@@ -77,24 +90,14 @@ void *Receiver::run() {
 		// listen to the socket
 		cout<<"Waiting for a connection"<<endl;
 		this->connectServer();
-		cout<<"passing through"<<endl;
-		// fork to accept other connection	
-		// TODO: change it to create a new thread instead of forking
-		pid = fork();
-		if (pid == 0) {
-			
-			// the child must behave correctly
-			close(this->sockfd);
-			cout << "Entering process" <<endl;
-			
-			process();
-			exit(0);
-		} else {
-			close(this->newsockfd);
-		}
+		// new thread to accept other connections	
+		pthread_t t;
+		Receiver *threadedReceiver = new Receiver(*this);
+		pthread_create(&t, NULL, &Receiver::processWrapper, threadedReceiver);
 	}
 	close(this->sockfd);
 	close(this->newsockfd);
+	return 0;
 }
 
 // wrapper to launch a thread

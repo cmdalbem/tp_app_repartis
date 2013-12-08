@@ -10,16 +10,7 @@ Connector::Connector(Server *pserver) {
 	 receiver = Receiver(pserver); 
 }
 
-Connector::Connector(int machineId, unsigned int nbMaxSenders, string listIpAdress[], unsigned int senderPortNo[], unsigned int portNo, Server *pserver) {
-	receiver=Receiver(pserver);
-	receiver.serverMain(machineId, portNo);		
-	printf("Serveur launched\n");
-
-	for (unsigned int i = 0; i < nbMaxSenders-1; ++i) {
-		cout << i+1 << " senders registered of " << nbMaxSenders -1 << endl;
-		senders.push_back(new Sender(machineId));
-	}	
-	cout << "the " << nbMaxSenders << " have been registered" << endl;
+void Connector::initialize(unsigned int nbMaxSenders,string listIpAdress[], unsigned int senderPortNo[]) {
 	bool allConnected;
 	bool change;
 	while(1) {
@@ -47,6 +38,19 @@ Connector::Connector(int machineId, unsigned int nbMaxSenders, string listIpAdre
 			senders[0]->threadedSender->update(event);
 		}
 	}
+
+}
+
+Connector::Connector(int machineId, unsigned int nbMaxSenders, string listIpAdress[], unsigned int senderPortNo[], unsigned int portNo, Server *pserver) {
+	receiver=Receiver(pserver);
+	receiver.serverMain(machineId, portNo);		
+	printf("Serveur launched\n");
+
+	for (unsigned int i = 0; i < nbMaxSenders-1; ++i) {
+		cout << i+1 << " senders registered of " << nbMaxSenders -1 << endl;
+		senders.push_back(new Sender(machineId));
+	}	
+	cout << "the " << nbMaxSenders << " have been registered" << endl;
 }
 
 Connector::~Connector() {

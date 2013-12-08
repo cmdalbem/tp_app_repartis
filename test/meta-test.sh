@@ -1,3 +1,5 @@
+#!/bin/bash
+
 if [ $# -ne 1 ] ; then
 	echo "I need one argument"
 	exit
@@ -9,9 +11,9 @@ chmod 777 tmp.sh
 even="True"
 i=0
 for word in $(cat $1); do
-	i=$i$i
 	if [ $even = "True" ]
 	then
+		i=$(( $i + 1  ))
 		even="False"
 		cat "machine/$word" > entryTmp
 	else 

@@ -13,6 +13,11 @@ using namespace std;
 const string Server::configFile = "system.cfg";
 
 void Server::configure() {
+	// Initialize the msgQueue mutex
+	pthread_mutex_init(&msgQueueMutex, NULL);
+	pthread_cond_init(&msgQueueCond, NULL);
+
+	// Initialize unique file ID
 	lastFileId = 0;
 
 	ifstream file;
@@ -33,13 +38,6 @@ void Server::configure() {
 	file.getline(buffer, 200);
 	file >> nbMaxClients;
 } 
-
-Server::Server(string ip) {
-	configure();
-	this->connector = Connector(this); 
-	this->ip = ip;
-	lastFileId = 0;
-}	
 
 
 Server::Server(int machineId, string ip, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo) {
@@ -75,120 +73,155 @@ int Server::getNewFileId()
 	return newFileId;
 }
 
-//File* Server::newFile(string title, string content) {
-void Server::newFile(string title, string content, vector<int> owners) {
+void *newFile(void *arguments) {
+	struct newFile_args *args = (struct newFile_args *) arguments;
+	Server *me = args->server;
+	string title = args->title;
+	string content = args->content;
+	vector<int> owners = args->owners;
+
 	string buffer;
 	string fileMsg;
 
 	// Create new file
-	File* f = new File(getNewFileId(), title, content, owners);
-	fileMsg = msg_file_transfer(f);
+	File* f = new File(me->getNewFileId(), title, content, owners);
+	fileMsg = me->msg_file_transfer(f);
 
 	// Finds out who is alive
-	connector.broadcast(msg_aliveQ());
+	me->connector.broadcast(me->msg_aliveQ());
 
 	// Replicate it in the network
 	string src;
 	int dest;
-	for (unsigned int i = 0; i < nbMaxErrors+1; ++i) {
+	for (unsigned int i = 0; i < me->nbMaxErrors+1; ++i) {
 		// Send the file for the first K+1 guys who answers
-		connector.receive(&src,&buffer);
-		connector.send(dest,fileMsg);
+		me->connector.receive(&src,&buffer);
+		me->connector.send(dest,fileMsg);
 	}
 
 	// Add file locally
-	manager.add(f);
+	me->manager.add(f);
 
-	lastFileId++;
+	me->incrementLastFileId();
+
+	return 0;
 }
 
-void Server::updateFile(int file_id, string title, string content, vector<int> owners) {
+void *updateFile(void *arguments) {
+	// Parse arguments
+	struct updateFile_args *args = (struct updateFile_args *) arguments;
+	Server *me = args->server;
+	int file_id = args->file_id;
+	string title = args->title;
+	string content = args->content;
+	vector<int> owners = args->owners;
+
 	string buffer;
 	string src;
 
 	// Asks who has the file
-	connector.broadcast(msg_who_has(file_id));
+	me->connector.broadcast(me->msg_who_has(file_id));
 
 	// Waits until someone answers
 	File* f = new File(file_id, title, content, owners);
-	string msg = msg_file_transfer(f);
+	string msg = me->msg_file_transfer(f);
 
 	int dest;
-	while (connector.receive(&src,&buffer))
-		connector.send(dest, msg);
+	while (me->connector.receive(&src,&buffer))
+		me->connector.send(dest, msg);
 
 	// Check if the file is available locally
-	File* file = manager.read(file_id);
+	File* file = me->manager.read(file_id);
 	if(file)
-		manager.modify(file_id, title, content);
+		me->manager.modify(file_id, title, content);
 
+	return 0;
 }
 
-void Server::deleteFile(int file_id) {
+void *deleteFile(void* arguments) {
+	// Parse arguments
+	struct file_args *args = (struct file_args *)arguments;
+	Server *me = args->server;
+	int file_id = args->file_id;
+
 	string msg;
 		
 	// Tells everyone that this file has to be deleted
-	connector.broadcast(msg_del(file_id));
+	me->connector.broadcast(me->msg_del(file_id));
 
 	// Check if the file is available locally
-	File* file = manager.read(file_id);
+	File* file = me->manager.read(file_id);
 	if(file)
-		manager.erase(file_id);
+		me->manager.erase(file_id);
 
+	return 0;
 }
 	
-File* Server::readFile(int file_id) {
+void *readFile(void* arguments) {
+	// Parse arguments
+	struct file_args *args = (struct file_args *) arguments;
+	Server *me = args->server;
+	int file_id = args->file_id;
+
 	File* file = NULL;
 
 	// Check if the file is available locally
-	file = manager.read(file_id);
-	if(file)
-		return file;
-	else {	
+	file = me->manager.read(file_id);
+	if(!file) {
 		string msg;
 
 		// Asks who has the file
-		connector.broadcast(msg_who_has(file_id));
+		me->connector.broadcast(me->msg_who_has(file_id));
 
 		// Waits until someone answers
 		string src;
-		connector.receive(&src,&msg);
+		me->connector.receive(&src,&msg);
 
 		// Asks the file for the first who answered
 		int dest;
-		connector.send(dest, msg_file_req(file_id));
+		me->connector.send(dest, me->msg_file_req(file_id));
 
 		// Receive the file
-		connector.receive(&src,&msg);
+		me->connector.receive(&src,&msg);
 
 		file = new File();
 		file->parse_JSON(msg);
-
-		return file;
 	}
 
+	// TODO: wut
+	//return file;
+	return 0;
 }
 
-void Server::listFiles() {
+void *listFiles(void* arg) {
+	// Parse arguments
+	Server *me = (Server*) arg;
+
 	// TODO: how to retrieve a full list of files through servers?
 	
 	// temporary: just list local files for now
-	manager.showAll();
+	me->manager.showAll();
+
+	return 0;
 }
 
-void Server::restart() {
+void *restart(void* arg) {
+	// Parse arguments
+	Server *me = (Server*) arg;
+
 	// TODO: make it select only one machine to receive a given file from.
 	
 	// Tells everyone that you're coming back
-	connector.broadcast(msg_reestart());
+	me->connector.broadcast(me->msg_reestart());
 
 	// Receives files from people
 	string src, buffer;
-	while (connector.receive(&src,&buffer)) {
+	while (me->connector.receive(&src,&buffer)) {
 		File *f = new File(buffer);
-		manager.add(f);
+		me->manager.add(f);
 	}
 
+	return 0;
 }
 
 void Server::handleMessage(char *msg) {
@@ -305,7 +338,18 @@ void Server::handleMessage(char *msg) {
 				vector<int> owners;
 				for (unsigned int i = 0; i < data["owners"].size(); ++i)
 					owners.push_back(data["owners"][i].asInt());
-				newFile(data["title"].asString(), data["content"].asString(), owners);
+				
+				// Launch thread that will run the algorithm
+				pthread_t t;
+				struct newFile_args args = {
+					this,
+					data["title"].asString(),
+					data["content"].asString(),
+					owners
+				};
+				pthread_create(&t, NULL, &newFile, (void*)&args);
+
+				//newFile(data["title"].asString(), data["content"].asString(), owners);
 			}
 			break;
 
@@ -315,20 +359,50 @@ void Server::handleMessage(char *msg) {
 				vector<int> owners;
 				for (unsigned int i = 0; i < data["owners"].size(); ++i)
 					owners.push_back(data["owners"][i].asInt());
-				updateFile(data["file_id"].asInt(), data["title"].asString(), data["content"].asString(), owners);
+
+				// Launch thread that will run the algorithm
+				pthread_t t;
+				struct updateFile_args args = {
+					this,
+					data["file_id"].asInt(),
+					data["title"].asString(),
+					data["content"].asString(),
+					owners
+				};
+				pthread_create(&t, NULL, &updateFile, (void*)&args);
+
+				//updateFile(data["file_id"].asInt(), data["title"].asString(), data["content"].asString(), owners);
 			}
 			break;
 
 		case 9:
 			// delete_file
-			deleteFile(data["file_id"].asInt());
+			{
+				// Launch thread that will run the algorithm
+				pthread_t t;
+				struct file_args args = {
+					this,
+					data["file_id"].asInt()
+				};
+				pthread_create(&t, NULL, &deleteFile, (void*)&args);
+
+				//deleteFile(data["file_id"].asInt());
+			}
 			break;
 
 		case 10:
 			// read_file
 			{
-				File* f = readFile(data["file_id"].asInt());
-				// TODO: do something with it (send it back to the Interface?)
+				pthread_t t;
+				struct file_args args = {
+					this,
+					data["file_id"].asInt()
+				};
+				pthread_create(&t, NULL, &readFile, (void*)&args);
+
+				// TODO: receive the file...
+				
+				//File* f = readFile(data["file_id"].asInt());
 			}
 			break;
 

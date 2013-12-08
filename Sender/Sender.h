@@ -69,7 +69,8 @@ private:
 	list<Event> eventQueue;
 	string ip;
 	pthread_mutex_t m;
-	pthread_cond_t c;
+	pthread_cond_t c
+	;
 };
 
 #endif

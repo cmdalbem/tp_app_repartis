@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <queue>
+#include <pthread.h>
 
 #include <jsoncpp/json.h>
 #include "File.h"
@@ -10,48 +12,54 @@
 
 using namespace std;
 
+struct newFile_args {
+	Server *server;
+	string title;
+	string content;
+	vector<int> owners;
+};
+
+struct updateFile_args {
+	Server *server;
+	int file_id;
+	string title;
+	string content;
+	vector<int> owners;
+};
+
+struct file_args {
+	Server *server;
+	int file_id;
+};
+
+void 	*newFile(void* args); // args = newFile_args
+void 	*updateFile(void* args); // args = updateFile_args
+void 	*deleteFile(void* args); // args = file_args
+void 	*readFile(void* args); // args = file_args
+void 	*listFiles(void* args); // args = Server*
+void 	*restart(void* args); // args = Server*
+
+
 class Server {
 public:
 
 	Server(); 
-	Server(string ip); 
 	Server(int machineId, string ip, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo); 
 	~Server();
 
-	// Public getters
-	string getIP() { return ip; }
-	int getId() { return machineId; }
+	// Lots of these functions must be public because they are accessed by the
+	//   algorithms threads, which are not methods of the class.
 
-	// Files Management
-	void 	newFile(string title, string content, vector<int> owners);
-	void 	updateFile(int file_id, string title, string content, vector<int> owners);
-	void 	deleteFile(int file_id);
-	File* 	readFile(int file_id);
-	void 	listFiles();
-
-	void restart();
-
-	void handleMessage(char *msg);
-	void ping();
-
-	void configure();
-
-private:
-	static const string configFile; 
+	// Public attributes
 	FilesManager manager;
 	Connector connector;
+	unsigned int nbMaxErrors; // K
+	unsigned int nbMaxClients; // M
 
-	// generates the ID for a new file
+	// generates an ID for a new file
 	int getNewFileId();
 
-	// id of the machine using this server (often = ip)
-	int machineId;
-
-	// starts with 0, increments at each new file.
-	// the real file ID will be formed by machineID + lastFileID
-	int lastFileId;
-	
-	string ip;
+	void incrementLastFileId() { lastFileId++; }
 
 	// Message writing functions
 	string msg_file_req(int file_id);
@@ -67,10 +75,31 @@ private:
 	string msg_read_file(int file_id);
 	string msg_file_transfer(string fileJson);
 	string msg_file_transfer(File *f);
+	
+	// Public getters
+	string getIP() { return ip; }
+	int getId() { return machineId; }
 
-	// TODO transcript it into parameters
-	unsigned int nbMaxErrors; // K
-	unsigned int nbMaxClients; // M
+	void handleMessage(char *msg);
+	void ping();
+
+	void configure();
+
+private:
+	static const string configFile; 
+
+	queue<string> msgQueue;
+	pthread_mutex_t msgQueueMutex;
+	pthread_cond_t msgQueueCond;
+
+	// id of the machine using this server (often = ip)
+	int machineId;
+
+	// starts with 0, increments at each new file.
+	// the real file ID will be formed by machineID + lastFileID
+	int lastFileId;
+	
+	string ip;
 };
 
 #endif

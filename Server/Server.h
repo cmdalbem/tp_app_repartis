@@ -22,16 +22,11 @@ public:
 	string getIP() { return ip; }
 
 	// Files Management
-	//File* newFile(string title, string content);
-	void newFile(string title, string content);
-	
-	void updateFile(int file_id, string title, string content);
-	
-	void deleteFile(int file_id);
-	
-	File* readFile(int file_id);
-
-	void listFiles();
+	void 	newFile(string title, string content);
+	void 	updateFile(int file_id, string title, string content);
+	void 	deleteFile(int file_id);
+	File* 	readFile(int file_id);
+	void 	listFiles();
 
 	void reestart();
 
@@ -53,8 +48,23 @@ private:
 	// starts with 0, increments at each new file.
 	// the real file ID will be formed by machineID + lastFileID
 	int lastFileId;
-
+	
 	string ip;
+
+	// Message writing functions
+	string msg_file_req(int file_id);
+	string msg_who_has(int file_id);
+	string msg_i_has(int file_id);
+	string msg_reestart();
+	string msg_del(int file_id);
+	string msg_aliveQ(); //alive?
+	string msg_aliveA(); //alive!
+	string msg_new_file(string title, string content);
+	string msg_update_file(string title, string content);
+	string msg_delete_file(int file_id);
+	string msg_read_file(int file_id);
+	string msg_file_transfer(string fileJson);
+	string msg_file_transfer(File *f);
 
 	// TODO transcript it into parameters
 	unsigned int nbMaxErrors; // K

@@ -3,7 +3,7 @@
 #include <string>
 #include <iostream>
 
-enum Type {Ping};
+enum Type {Ping,BetweenServer,CreateFile,DeleteFile,ReadFile,ModifyFile,ShowFiles};
 class Event {
 	public:
 	Type getType() { return this->type; }

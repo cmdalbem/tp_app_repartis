@@ -62,7 +62,7 @@ void Connector::send(int destId, string msg) {
 	int offset;
 	offset = (machineId < destId) ? -1 : 0;
 	if (destId < senders.size()) {
-		Event e(Ping, msg);
+		Event e(BetweenServer, msg);
 		senders[destId + offset]->threadedSender->update(e);
 	} else {
 		fprintf(stderr, "Envoie à ID inexistant : %i\n", destId);

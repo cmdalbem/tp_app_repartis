@@ -2,27 +2,34 @@
 #include <iostream>
 #include <string>
 
+#include <jsoncpp/json.h>
 #include "interface.h"
+#include <Sender.h>
+#include <ClientReceiver.h>
+#include <Event.h>
 
 using namespace std;
 
+Sender sender(1000, "localhost");
+ClientReceiver receiver;
 
-// Globals
-Server *server = NULL;
+void initialize() {
+	receiver=ClientReceiver();
+	receiver.serverMain(1001, 1337);		
+	while (!sender.isConnected()) {
+		sender.SenderMain("127.0.0.1",5020);
+		sleep(1);
+	}
+}
+
 
 int main(void) {
 	int command;
+	initialize();
 
 	bool exit = false;
 
 	while (not exit) {
-
-		// Connects to a server
-		while (server==NULL)
-			connectToServer();
-		// Server is connected, we can start playing with files
-		cout << "connectedToServer ended" << endl;
-		continue;
 
 		cout << "(1) to create a file\n"
 			"(2) to delete a file\n"
@@ -60,42 +67,6 @@ int main(void) {
 	}
 }
 
-void connectToServer()
-{
-	string ip, port;
-
-//	cout << "Please enter the server IP: ";
-//	cin >> ip;
-	ip = "localhost";
-
-	cout << "Please enter the id (<10): ";
-	cin >> port;
-	int machineId = port[0] - '0';
-	cout << "Please enter the port number: ";
-	cin >> port;
-	int portNo = 5020 + port[0] - '0';
-	cout << portNo << endl;
-	cout << "Enter the number of machines (<10)" << endl;
-	cin >> port;
-	int nbMachine = port[0] - '0';
-	unsigned int clientPort[10];
-	for (int i = 0; i < nbMachine - 1; i++) {
-		cout << "Please enter the clients port number: ";
-		cin >> port;
-		clientPort[i] = 5020 + port[0] - '0';
-	}
-	
-	cout << "The machine " << machineId << " on port ";
-	cout << portNo << " talks to";
-	for (int i = 0; i < nbMachine - 1; i++) {
-		cout << " " << clientPort[i];
-	} 
-	cout << "." << endl;
-	
-	// Connect to server
-	string tmp[] = {"localhost", "localhost"};
-}
-
 void createFile()
 {
 	string title, content;
@@ -104,9 +75,9 @@ void createFile()
 	cin >> title;
 	cout << "content: " << endl;
 	cin >> content;
-
-	vector<int> owners;
-	owners.push_back(server->getId());
+	string msg=msg_new_file(title,content);;
+	Event event=Event(CreateFile,msg);
+	sender.update(event);
 }
 
 void deleteFile()
@@ -116,7 +87,9 @@ void deleteFile()
 
 	cout << "id of the file: " << endl;
 	cin >> id;
-
+	string msg=msg_delete_file(id);
+	Event event=Event(DeleteFile,msg);
+	sender.update(event);
 }
 
 void readFile()
@@ -125,14 +98,16 @@ void readFile()
 
 	cout << "id of the file: " <<endl;
 	cin >> id;
+	string msg=msg_read_file(id);
+	Event event=Event(ReadFile,msg);
+	sender.update(event);
 
 }
 
 void modifyFile()
 {
-	int id, nowners;
+	int id;
 	string title, content;
-	vector<int> owners;
 		
 	cout << "id of the file: " << endl;
 	cin >> id;
@@ -140,18 +115,56 @@ void modifyFile()
 	cin >> title;
 	cout << "content of the file: " << endl;
 	cin >> content;
-	cout << "how many owners?" << endl;
-	cin >> nowners;
-	for (int i = 0; i < nowners; ++i)
-	{
-		int ownerTmp;
-		cout << "owner " << i << ": ";
-		cin >> ownerTmp;
-		owners.push_back(ownerTmp);
-	}
+	string msg=msg_update_file(title,content,id);
+	Event event=Event(ModifyFile,msg);
+	sender.update(event);
 }
 
 void showFiles()
 {
+	string msg="";
+	Event event=Event(ShowFiles,msg);
+	sender.update(event);
+}
 
+
+string msg_new_file(string title, string content) {
+	Json::Value data;
+	
+	data["type"] = "new_file";
+	data["title"] = title;
+	data["content"] = content;
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
+
+}
+string msg_update_file(string title, string content, int file_id) {
+	Json::Value data;
+	
+	data["type"] = "update_file";
+	data["title"] = title;
+	data["content"] = content;
+	data["file_id"] = file_id;
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
+}
+string msg_delete_file(int file_id) {
+	Json::Value data;
+	
+	data["type"] = "delete_file";
+	data["file_id"] = file_id;
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
+}
+string msg_read_file(int file_id) {
+	Json::Value data;
+	
+	data["type"] = "read_file";
+	data["file_id"] = file_id;
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
 }

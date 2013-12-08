@@ -79,12 +79,12 @@ int Server::getNewFileId()
 }
 
 //File* Server::newFile(string title, string content) {
-void Server::newFile(string title, string content) {
+void Server::newFile(string title, string content, vector<int> owners) {
 	string buffer;
 	string fileMsg;
 
 	// Create new file
-	File* f = new File(getNewFileId(), title, content);
+	File* f = new File(getNewFileId(), title, content, owners);
 	fileMsg = msg_file_transfer(f);
 
 	// Finds out who is alive
@@ -104,7 +104,7 @@ void Server::newFile(string title, string content) {
 	lastFileId++;
 }
 
-void Server::updateFile(int file_id, string title, string content) {
+void Server::updateFile(int file_id, string title, string content, vector<int> owners) {
 	string buffer;
 	string src;
 
@@ -112,7 +112,7 @@ void Server::updateFile(int file_id, string title, string content) {
 	connector.broadcast(msg_who_has(file_id));
 
 	// Waits until someone answers
-	File* f = new File(file_id, title, content);
+	File* f = new File(file_id, title, content, owners);
 	string msg = msg_file_transfer(f);
 
 	while (connector.receive(&src,&buffer))
@@ -287,12 +287,12 @@ void Server::handleMessage(char *msg) {
 
 		case 7: 
 			// new_file
-			newFile(data["title"].asString(), data["content"].asString());
+			//newFile(data["title"].asString(), data["content"].asString(), data["owners"]);
 			break;
 
 		case 8:
 			// update_file
-			updateFile(data["file_id"].asInt(), data["title"].asString(), data["content"].asString());
+			//updateFile(data["file_id"].asInt(), data["title"].asString(), data["content"].asString(),data["owners"]);
 			break;
 
 		case 9:

@@ -484,45 +484,6 @@ string Server::msg_aliveA() {
 	Json::StyledWriter writer;
 	return writer.write(data);
 }
-string Server::msg_new_file(string title, string content) {
-	Json::Value data;
-	
-	data["type"] = "new_file";
-	data["title"] = title;
-	data["content"] = content;
-	
-	Json::StyledWriter writer;
-	return writer.write(data);
-
-}
-string Server::msg_update_file(string title, string content) {
-	Json::Value data;
-	
-	data["type"] = "update_file";
-	data["title"] = title;
-	data["content"] = content;
-	
-	Json::StyledWriter writer;
-	return writer.write(data);
-}
-string Server::msg_delete_file(int file_id) {
-	Json::Value data;
-	
-	data["type"] = "delete_file";
-	data["file_id"] = file_id;
-	
-	Json::StyledWriter writer;
-	return writer.write(data);
-}
-string Server::msg_read_file(int file_id) {
-	Json::Value data;
-	
-	data["type"] = "read_file";
-	data["file_id"] = file_id;
-	
-	Json::StyledWriter writer;
-	return writer.write(data);
-}
 string Server::msg_file_transfer(string fileJson) {
 	Json::Value data;
 	
@@ -530,8 +491,7 @@ string Server::msg_file_transfer(string fileJson) {
 	data["fileJson"] = fileJson;
 	
 	Json::StyledWriter writer;
-	return writer.write(data);
-}
+
 string Server::msg_file_transfer(File* f) {
 	Json::Value data;
 

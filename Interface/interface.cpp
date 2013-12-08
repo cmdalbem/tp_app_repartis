@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 
+#include <jsoncpp/json.h>
 #include "interface.h"
 #include <Sender.h>
 #include <ClientReceiver.h>
@@ -16,7 +17,7 @@ void initialize() {
 	receiver=ClientReceiver();
 	receiver.serverMain(1001, 1337);		
 	while (!sender.isConnected()) {
-		sender.SenderMain("127.0.0.1",0);
+		sender.SenderMain("127.0.0.1",5020);
 		sleep(1);
 	}
 }
@@ -74,7 +75,7 @@ void createFile()
 	cin >> title;
 	cout << "content: " << endl;
 	cin >> content;
-	string msg="";
+	string msg=msg_new_file(title,content);;
 	Event event=Event(CreateFile,msg);
 	sender.update(event);
 }
@@ -86,7 +87,7 @@ void deleteFile()
 
 	cout << "id of the file: " << endl;
 	cin >> id;
-	string msg="";
+	string msg=msg_delete_file(id);
 	Event event=Event(DeleteFile,msg);
 	sender.update(event);
 }
@@ -97,7 +98,7 @@ void readFile()
 
 	cout << "id of the file: " <<endl;
 	cin >> id;
-	string msg="";
+	string msg=msg_read_file(id);
 	Event event=Event(ReadFile,msg);
 	sender.update(event);
 
@@ -114,7 +115,7 @@ void modifyFile()
 	cin >> title;
 	cout << "content of the file: " << endl;
 	cin >> content;
-	string msg="";
+	string msg=msg_update_file(title,content,id);
 	Event event=Event(ModifyFile,msg);
 	sender.update(event);
 }
@@ -124,4 +125,46 @@ void showFiles()
 	string msg="";
 	Event event=Event(ShowFiles,msg);
 	sender.update(event);
+}
+
+
+string msg_new_file(string title, string content) {
+	Json::Value data;
+	
+	data["type"] = "new_file";
+	data["title"] = title;
+	data["content"] = content;
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
+
+}
+string msg_update_file(string title, string content, int file_id) {
+	Json::Value data;
+	
+	data["type"] = "update_file";
+	data["title"] = title;
+	data["content"] = content;
+	data["file_id"] = file_id;
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
+}
+string msg_delete_file(int file_id) {
+	Json::Value data;
+	
+	data["type"] = "delete_file";
+	data["file_id"] = file_id;
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
+}
+string msg_read_file(int file_id) {
+	Json::Value data;
+	
+	data["type"] = "read_file";
+	data["file_id"] = file_id;
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
 }

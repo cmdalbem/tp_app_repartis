@@ -4,6 +4,7 @@
 #include "Connector.h"
 #include "Server.h"
 #include "Event.h"
+
 using namespace std;
 
 Connector::Connector(Server *pserver) {
@@ -42,6 +43,8 @@ void Connector::initialize(unsigned int nbMaxSenders,string listIpAdress[], unsi
 }
 
 Connector::Connector(int machineId, unsigned int nbMaxSenders, string listIpAdress[], unsigned int senderPortNo[], unsigned int portNo, Server *pserver) {
+	this->machineId = machineId;
+
 	receiver=Receiver(pserver);
 	receiver.serverMain(machineId, portNo);		
 	printf("Serveur launched\n");
@@ -57,10 +60,16 @@ Connector::~Connector() {
 
 }
 
-void Connector::send(string ip, string msg) {
-	//...
-	ip = ip;
-	msg = msg;
+void Connector::send(int destId, string msg) {
+	int offset;
+	offset = (machineId < destId) ? -1 : 0;
+	if (destId < senders.size()) {
+		Event e(Ping, msg);
+		senders[destId + offset]->update(e);
+	} else {
+		fprintf(stderr, "Envoie à ID inexistant : %i\n", destId);
+		exit(0);
+	}
 }
 
 bool Connector::receive(string *src, string *msg, float timeout) {

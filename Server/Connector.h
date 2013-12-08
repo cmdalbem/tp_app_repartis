@@ -19,17 +19,17 @@ public:
 	Connector(int machineId, unsigned int nbMaxSenders, string listIpAdress[], unsigned int senderPortNo[], unsigned int portNo, Server *pserver);
 	~Connector();
 
-	void send(string ip, string msg);
+	void send(int id, string msg);
 	// Blocking receive. Returns "false" if timeout.
 	bool receive(string *src, string *msg, float timeout=DEFAULT_TIMEOUT);
 	void broadcast(string msg);
 	
 	void addConnection(string ip);
 	
-
 	vector<Sender *> senders;
-
 private:
+	int machineId;
+
 	Receiver receiver;
 };
 

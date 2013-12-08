@@ -3,12 +3,26 @@
 #include <string>
 
 #include "interface.h"
+#include <Sender.h>
+#include <ClientReceiver.h>
 
 using namespace std;
 
+Sender sender(1000, "localhost");
+ClientReceiver receiver;
+
+void initialize() {
+	receiver=ClientReceiver();
+	receiver.serverMain(1001, 1337);		
+	while (!sender.isConnected()) {
+		sender.SenderMain("127.0.0.1",0);
+		sleep(1);
+	}
+}
 
 int main(void) {
 	int command;
+	initialize();
 
 	bool exit = false;
 
@@ -58,6 +72,9 @@ void createFile()
 	cin >> title;
 	cout << "content: " << endl;
 	cin >> content;
+	string msg=;
+	Event event=Event(CreateFile,msg);
+	sender.update(event);
 
 }
 
@@ -68,6 +85,8 @@ void deleteFile()
 
 	cout << "id of the file: " << endl;
 	cin >> id;
+	Event event=Event(DeleteFile,msg);
+	sender.update(event);
 
 }
 
@@ -77,6 +96,8 @@ void readFile()
 
 	cout << "id of the file: " <<endl;
 	cin >> id;
+	Event event=Event(ReadFile,msg);
+	sender.update(event);
 
 }
 
@@ -91,8 +112,12 @@ void modifyFile()
 	cin >> title;
 	cout << "content of the file: " << endl;
 	cin >> content;
+	Event event=Event(modifyFile,msg);
+	sender.update(event);
 }
 
 void showFiles()
+	Event event=Event(showFiles,msg);
+	sender.update(event);
 {
 }

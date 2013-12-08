@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include <string>
 
-#include "Connector.h"
-#include "Server.h"
+#include <Sender.h>
 
 void createFile();
 

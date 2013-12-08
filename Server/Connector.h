@@ -11,7 +11,7 @@ using namespace std;
 #define DEFAULT_TIMEOUT 0.5
 class Server;
 
-class Connector: Publisher {
+class Connector {
 public:
 	void initialize(unsigned int nbMaxSenders,string listIpAdress[], unsigned int senderPortNo[]);
 	Connector() {};

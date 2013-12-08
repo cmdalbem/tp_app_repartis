@@ -3,23 +3,29 @@
 #include <jsoncpp/json.h>
 #include <string>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
 class File {
-	int id;
-	string title;
-	string content;
-	public:
 	
+public:
 	File() {}
 
-	File(int id, string title, string content)
+	File(int id, string title, string content, vector<int> owners)
 	{
 		this->id = id;
 		this->title = title;
 		this->content = content;
-	}	
+		this->owners = owners;
+	}
+
+	// Attributes
+	int id;
+	string title;
+	string content;
+	vector<int> owners;
+
 	/* debug */
 	string show();
 
@@ -29,31 +35,6 @@ class File {
 	void to_JSON(string& output_data);
 	int parse_JSON(string json_data);
 
-	/* 
-	 * Getters and setters
-	 */
-	int get_id() {
-		return this->id;
-	}
-	void set_id(int idf)
-	{
-		this->id = idf;
-	}
-	string get_title() {
-		return this->title;
-	}
-	void set_title(string new_title)
-	{
-		this->title = new_title;
-	}
-	string get_content() {
-		return this->content;
-	}
-	void set_content(string new_content)
-	{
-		this->content = new_content;
-	}
 };
+
 #endif
-
-

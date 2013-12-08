@@ -73,7 +73,7 @@ public:
 	string msg_file_req(int file_id);
 	string msg_who_has(int file_id);
 	string msg_i_has(int file_id);
-	string msg_reestart();
+	string msg_restart();
 	string msg_del(int file_id);
 	string msg_aliveQ(); //alive?
 	string msg_aliveA(); //alive!
@@ -83,6 +83,8 @@ public:
 	string msg_read_file(int file_id);
 	string msg_file_transfer(string fileJson);
 	string msg_file_transfer(File *f);
+	string msg_add(string fileJson);
+	string msg_add(File *f);
 	
 	// Message Buffer managing
 	void pushMessage(int src, string msg);

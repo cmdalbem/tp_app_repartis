@@ -4,6 +4,7 @@
 
 bool FilesManager::add(File *file) {
 	pair<map<int,File*>::iterator,bool> ret = files.insert(pair<int,File *>(file->id, file));
+	// Returns if addition succeeded or if file_id already existed
 	return ret.second;
 }
 

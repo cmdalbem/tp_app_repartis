@@ -89,7 +89,7 @@ void *newFile(void *arguments) {
 	// Create new file
 	File* f = new File(me->getNewFileId(), title, content, owners);
 	me->incrementLastFileId();
-	fileMsg = me->msg_file_transfer(f);
+	fileMsg = me->msg_add(f);
 
 	// Finds out who is alive
 	me->connector.broadcast(me->msg_aliveQ());
@@ -122,7 +122,7 @@ void *updateFile(void *arguments) {
 
 	// Send the file to everyone that has the file
 	File* f = new File(file_id, title, content, owners);
-	string msg = me->msg_file_transfer(f);
+	string msg = me->msg_add(f);
 
 	MessageStoreNode buffer;
     stringstream ss;
@@ -144,12 +144,10 @@ void *deleteFile(void* arguments) {
 	Server *me = args->server;
 	int file_id = args->file_id;
 
-	string msg;
-		
 	// Tells everyone that this file has to be deleted
 	me->connector.broadcast(me->msg_del(file_id));
 
-	// Check if the file is available locally
+	// Check if the file is available locally. If yes, delete it too.
 	File* file = me->manager.read(file_id);
 	if(file)
 		me->manager.erase(file_id);
@@ -168,7 +166,7 @@ void *readFile(void* arguments) {
 	// Check if the file is available locally
 	file = me->manager.read(file_id);
 	if(!file) {
-		// Asks who has the file
+		// Asks everyone who has the file
 		me->connector.broadcast(me->msg_who_has(file_id));
 
 		MessageStoreNode buffer;
@@ -211,7 +209,7 @@ void *restart(void* arg) {
 	// OPTIMIZE: make it select only one machine to receive a given file from.
 	
 	// Tells everyone that you're coming back
-	me->connector.broadcast(me->msg_reestart());
+	me->connector.broadcast(me->msg_restart());
 
 	// Receives files from people
 	MessageStoreNode buffer;
@@ -319,9 +317,9 @@ void Server::handleMessage(char *msg) {
 	string msgType = data["type"].asString();
 
 	// With the correct field extracted, we compare if with all possible msg types
-	const int n = 12;
-	string types[] = {"file_req","who_has","i_has","reestart",
-					  "del","alive?","alive!","new_file","update_file",
+	const int n = 13;
+	string types[] = {"file_req","who_has","i_has","restart",
+					  "del","alive?","alive!","add","new_file","update_file",
 					  "delete_file","read_file","file_transfer"};
 	int whichType=-1;
 	// Compare then all. If found correct type, puts it in "whichType"
@@ -356,8 +354,7 @@ void Server::handleMessage(char *msg) {
 			{
 				// 	Check if I have this file locally. If yes, answers with a "i_has" msg.
 				int file_id = data["file_id"].asInt();
-				File *tmp = manager.read(file_id);
-				if(tmp)
+				if(manager.read(file_id))
 					connector.send(srcId, msg_i_has(file_id));
 			}
 
@@ -370,7 +367,7 @@ void Server::handleMessage(char *msg) {
 			break;
 
 		case 3:
-			// reestart
+			// restart
 			{
 				// Checks locally if I have any files that should be also owned by 'src'
 				// If yes, send it to him.
@@ -389,13 +386,18 @@ void Server::handleMessage(char *msg) {
 
 		case 4:
 			// del
+			{
+				// 	Check if I have this file locally. If yes, erases it.
+				int file_id = data["file_id"].asInt();
+				File *f = manager.read(file_id);
+				if(f)
+					manager.erase(file_id);
+			}
 			break;
 
 		case 5:
 			// alive?
-
 			connector.send(srcId, msg_aliveA());
-
 			break;
 
 		case 6:
@@ -404,12 +406,29 @@ void Server::handleMessage(char *msg) {
 			pushMessage(srcId,data["type"].asString());
 			break;
 
+		case 7:
+			// add
+			{
+				Json::Value fileData;
+				string fileJson = data["fileJson"].asString();
+				if (reader.parse(fileJson, fileData)) {
+					// Check if already had the file. If yes, update the value. If not, add it
+					int file_id = fileData["file_id"].asInt();
+					File *f = manager.read(file_id);
+					if(f)
+						manager.modify(file_id,fileData["title"].asString(), fileData["content"].asString());
+					else
+						manager.add(new File(fileJson));
+				}				
+			}
+			break;
+
 
 		////////////////////////////
 		// CLIENT/SERVER Messages //
 		////////////////////////////
 
-		case 7: 
+		case 8: 
 			// new_file
 			{
 				vector<int> owners;
@@ -430,7 +449,7 @@ void Server::handleMessage(char *msg) {
 			}
 			break;
 
-		case 8:
+		case 9:
 			// update_file
 			{
 				vector<int> owners;
@@ -447,12 +466,10 @@ void Server::handleMessage(char *msg) {
 					owners
 				};
 				pthread_create(&t, NULL, &updateFile, (void*)&args);
-
-				//updateFile(data["file_id"].asInt(), data["title"].asString(), data["content"].asString(), owners);
 			}
 			break;
 
-		case 9:
+		case 10:
 			// delete_file
 			{
 				// Launch thread that will run the algorithm
@@ -462,12 +479,10 @@ void Server::handleMessage(char *msg) {
 					data["file_id"].asInt()
 				};
 				pthread_create(&t, NULL, &deleteFile, (void*)&args);
-
-				//deleteFile(data["file_id"].asInt());
 			}
 			break;
 
-		case 10:
+		case 11:
 			// read_file
 			{
 				pthread_t t;
@@ -488,7 +503,7 @@ void Server::handleMessage(char *msg) {
 		// ALL/ALL Messages //
 		//////////////////////
 
-		case 11:
+		case 12:
 			// file_transfer
 			// Push into the msgs buffer
 			// TODO: what to do when receiving a file?
@@ -533,10 +548,10 @@ string Server::msg_i_has(int file_id) {
 	Json::StyledWriter writer;
 	return writer.write(data);
 }
-string Server::msg_reestart() {
+string Server::msg_restart() {
 	Json::Value data;
 	
-	data["type"] = "reestart";
+	data["type"] = "restart";
 	
 	Json::StyledWriter writer;
 	return writer.write(data);
@@ -550,6 +565,27 @@ string Server::msg_del(int file_id) {
 	Json::StyledWriter writer;
 	return writer.write(data);
 }
+string Server::msg_add(string fileJson) {
+	Json::Value data;
+	
+	data["type"] = "add";
+	data["fileJson"] = fileJson;
+	
+	Json::StyledWriter writer;
+}
+string Server::msg_add(File* f) {
+	Json::Value data;
+
+	string fileJson;
+	f->to_JSON(fileJson);
+	
+	data["type"] = "add";
+	data["fileJson"] = fileJson;
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
+}
+
 string Server::msg_aliveQ() {
 	Json::Value data;
 	

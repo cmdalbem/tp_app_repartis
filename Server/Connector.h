@@ -17,10 +17,10 @@ class Server;
 
 class Connector {
 public:
-	void initialize(unsigned int nbMaxSenders,string listIpAdress[], unsigned int senderPortNo[]);
+	void initialize(unsigned int nbMaxSenders,vector<string> listIpAdress, unsigned int senderPortNo[]);
 	Connector() {};
 	Connector(Server *pserver);
-	Connector(int machineId, unsigned int nbMaxSenders, string listIpAdress[], unsigned int senderPortNo[], unsigned int portNo, Server *pserver);
+	Connector(int machineId, unsigned int nbMaxSenders, vector<string> listIpAdress, unsigned int senderPortNo[], unsigned int portNo, Server *pserver);
 	~Connector();
 
 	void send(int id, string msg);

@@ -52,7 +52,7 @@ class Server {
 public:
 
 	Server(); 
-	Server(int machineId, string ip, string listIpAdress[], unsigned int clientPortNo[], unsigned int portNo); 
+	Server(int machineId, string ip, vector<string> listIpAdress, unsigned int clientPortNo[], unsigned int portNo); 
 	~Server();
 
 	// Lots of these functions must be public because they are accessed by the

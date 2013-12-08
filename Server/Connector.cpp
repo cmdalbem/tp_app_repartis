@@ -11,7 +11,7 @@ Connector::Connector(Server *pserver) {
 	 receiver = Receiver(pserver); 
 }
 
-void Connector::initialize(unsigned int nbMaxSenders,string listIpAdress[], unsigned int senderPortNo[]) {
+void Connector::initialize(unsigned int nbMaxSenders,vector<string> listIpAdress, unsigned int senderPortNo[]) {
 	bool allConnected;
 	bool change;
 	for (unsigned int i=0; i<nbMaxSenders-1;i++) {
@@ -43,7 +43,7 @@ void Connector::initialize(unsigned int nbMaxSenders,string listIpAdress[], unsi
 
 }
 
-Connector::Connector(int machineId, unsigned int nbMaxSenders, string listIpAdress[], unsigned int senderPortNo[], unsigned int portNo, Server *pserver) {
+Connector::Connector(int machineId, unsigned int nbMaxSenders, vector<string> listIpAdress, unsigned int senderPortNo[], unsigned int portNo, Server *pserver) {
 	this->machineId = machineId;
 	this->firstConnectionComplete=false;
 

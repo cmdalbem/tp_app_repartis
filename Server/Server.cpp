@@ -6,6 +6,8 @@
 #include <cmath>
 #include <fstream>
 
+#include <jsoncpp/json.h>
+
 using namespace std;
 
 const string Server::configFile = "system.cfg";
@@ -76,23 +78,22 @@ int Server::getNewFileId()
 
 //File* Server::newFile(string title, string content) {
 void Server::newFile(string title, string content) {
-	string msg;
+	string buffer;
+	string fileMsg;
 
 	// Create new file
 	File* f = new File(getNewFileId(), title, content);
-	f->to_JSON(msg);
-	msg = "f_" + msg;
+	fileMsg = msg_file_transfer(f);
 
 	// Finds out who is alive
-	msg = "alive?";
-	connector.broadcast(msg);
+	connector.broadcast(msg_aliveQ());
 
 	// Replicate it in the network
 	string src;
 	for (unsigned int i = 0; i < nbMaxErrors+1; ++i) {
 		// Send the file for the first K+1 guys who answers
-		connector.receive(&src,&msg);
-		connector.send(src,msg);
+		connector.receive(&src,&buffer);
+		connector.send(src,fileMsg);
 	}
 
 	// Add file locally
@@ -102,19 +103,17 @@ void Server::newFile(string title, string content) {
 }
 
 void Server::updateFile(int file_id, string title, string content) {
-	string msg;
+	string buffer;
+	string src;
 
 	// Asks who has the file
-	msg = "who_has " + file_id;
-	connector.broadcast(msg);
+	connector.broadcast(msg_who_has(file_id));
 
 	// Waits until someone answers
-	string src;
 	File* f = new File(file_id, title, content);
-	f->to_JSON(msg);
-	msg = "f_" + msg;
+	string msg = msg_file_transfer(f);
 
-	while (connector.receive(&src,&msg))
+	while (connector.receive(&src,&buffer))
 		connector.send(src,msg);
 
 	// Check if the file is available locally
@@ -128,8 +127,7 @@ void Server::deleteFile(int file_id) {
 	string msg;
 		
 	// Tells everyone that this file has to be deleted
-	msg = "del " + file_id;
-	connector.broadcast(msg);
+	connector.broadcast(msg_del(file_id));
 
 	// Check if the file is available locally
 	File* file = manager.read(file_id);
@@ -147,18 +145,16 @@ File* Server::readFile(int file_id) {
 		return file;
 	else {	
 		string msg;
-		
+
 		// Asks who has the file
-		msg = "who_has " + file_id;
-		connector.broadcast(msg);
+		connector.broadcast(msg_who_has(file_id));
 
 		// Waits until someone answers
 		string src;
 		connector.receive(&src,&msg);
 
 		// Asks the file for the first who answered
-		msg = "file_req " + file_id;
-		connector.send(src,msg);
+		connector.send(src,msg_file_req(file_id));
 
 		// Receive the file
 		connector.receive(&src,&msg);
@@ -180,45 +176,80 @@ void Server::listFiles() {
 
 void Server::reestart() {
 	// TODO: make it select only one machine to receive a given file from.
-	string msg = "reestart";
-	connector.broadcast(msg);
+	connector.broadcast(msg_reestart());
 
-	string src;
-	while (connector.receive(&src,&msg)) {
+	string src, buffer;
+	while (connector.receive(&src,&buffer)) {
 		File* f = new File();
-		f->parse_JSON(msg);
-		manager.add(f);
+		// TODO: this is wrong :P
+		//f->parse_JSON(buffer);
+		//manager.add(f);
 	}
 
 }
 
 void Server::handleMessage(char *msg) {
-	cout<<"handleMessage"<<endl;
+	// TEMP
 	ping();
 
-	const int n = 13;
-	const char *msgs[] = {"file_req","who_has","i_has","reestart",
-						  "del","alive?","alive!","new_file","update_file",
-						  "delete_file","read_file","f_"};
-	int type=-1;
+	// TODO: identify who's the source of the message
+	string src;
 
-	// Finds out which kind of message it is
+	Json::Reader reader;
+	Json::Value data;
+
+	// Parses the msg encoded in JSON
+	string json_data(msg);
+	bool parseOk = reader.parse(json_data, data);
+	if(!parseOk) {
+		cout << "ERROR can't handle message because I couldn't parse it's JSON.";
+		return;
+	}
+	string msgType = data["type"].asString();
+
+	// With the correct field extracted, we compare if with all possible msg types
+	const int n = 12;
+	string types[] = {"file_req","who_has","i_has","reestart",
+					  "del","alive?","alive!","new_file","update_file",
+					  "delete_file","read_file","file_transfer"};
+	int whichType=-1;
+	// Compare then all. If found correct type, puts it in "whichType"
 	for (int i = 0; i < n; ++i) {
-		if (strncmp(msg,msgs[i],strlen(msgs[i]))==0) {
-			type = i;
+		if (types[i].compare(msgType) == 0) {
+			whichType = i;
 			break;
 		}
 	}
 
-	cout << "Received message of type " << type << endl;
+	cout << "Identified msg as being of type: " << whichType << endl;
 
-	switch(type) {
+	// Now handle each one properly
+	switch(whichType) {
+		////////////////////////////
+		// SERVER/SERVER Messages //
+		////////////////////////////
+
 		case 0:
 			// file_req
+			{
+				// 	Check if I have this file locally. If yes, sends it.
+				int file_id = data["file_id"].asInt();
+				File *f = manager.read(file_id);
+				if(f)
+					connector.send(src, msg_file_transfer(f));
+			}
 			break;
 
 		case 1:
 			// who_has
+			{
+				// 	Check if I have this file locally. If yes, answers with a "i_has" msg.
+				int file_id = data["file_id"].asInt();
+				File *tmp = manager.read(file_id);
+				if(tmp)
+					connector.send(src, msg_i_has(file_id));
+			}
+
 			break;
 
 		case 2:
@@ -227,6 +258,9 @@ void Server::handleMessage(char *msg) {
 
 		case 3:
 			// reestart
+
+			// TODO: implement me!
+
 			break;
 
 		case 4:
@@ -235,30 +269,51 @@ void Server::handleMessage(char *msg) {
 
 		case 5:
 			// alive?
+
+			connector.send(src, msg_aliveA());
+
 			break;
 
 		case 6:
 			// alive!
 			break;
 
-		case 7:
+
+		////////////////////////////
+		// CLIENT/SERVER Messages //
+		////////////////////////////
+
+		case 7: 
 			// new_file
+			newFile(data["title"].asString(), data["content"].asString());
 			break;
 
 		case 8:
 			// update_file
+			updateFile(data["file_id"].asInt(), data["title"].asString(), data["content"].asString());
 			break;
 
 		case 9:
 			// delete_file
+			deleteFile(data["file_id"].asInt());
 			break;
 
 		case 10:
 			// read_file
+			{
+				File* f = readFile(data["file_id"].asInt());
+				// TODO: do something with it (send it back?)
+			}
 			break;
 
+
+		//////////////////////
+		// ALL/ALL Messages //
+		//////////////////////
+
 		case 11:
-			// f_
+			// file_transfer
+			// TODO: what to do?
 			break;
 
 		default:
@@ -266,4 +321,125 @@ void Server::handleMessage(char *msg) {
 	}
 
 	return;	
+}
+
+string Server::msg_file_req(int file_id) {
+	Json::Value data;
+	
+	data["type"] = "file_req";
+	data["file_id"] = file_id;
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
+}
+string Server::msg_who_has(int file_id) {
+	Json::Value data;
+	
+	data["type"] = "who_has";
+	data["file_id"] = file_id;
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
+}
+string Server::msg_i_has(int file_id) {
+	Json::Value data;
+	
+	data["type"] = "i_has";
+	data["file_id"] = file_id;
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
+}
+string Server::msg_reestart() {
+	Json::Value data;
+	
+	data["type"] = "reestart";
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
+}
+string Server::msg_del(int file_id) {
+	Json::Value data;
+	
+	data["type"] = "del";
+	data["file_id"] = file_id;
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
+}
+string Server::msg_aliveQ() {
+	Json::Value data;
+	
+	data["type"] = "alive?";
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
+}
+string Server::msg_aliveA() {
+	Json::Value data;
+	
+	data["type"] = "alive!";
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
+}
+string Server::msg_new_file(string title, string content) {
+	Json::Value data;
+	
+	data["type"] = "new_file";
+	data["title"] = title;
+	data["content"] = content;
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
+
+}
+string Server::msg_update_file(string title, string content) {
+	Json::Value data;
+	
+	data["type"] = "update_file";
+	data["title"] = title;
+	data["content"] = content;
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
+}
+string Server::msg_delete_file(int file_id) {
+	Json::Value data;
+	
+	data["type"] = "delete_file";
+	data["file_id"] = file_id;
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
+}
+string Server::msg_read_file(int file_id) {
+	Json::Value data;
+	
+	data["type"] = "read_file";
+	data["file_id"] = file_id;
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
+}
+string Server::msg_file_transfer(string fileJson) {
+	Json::Value data;
+	
+	data["type"] = "file_transfer";
+	data["fileJson"] = fileJson;
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
+}
+string Server::msg_file_transfer(File* f) {
+	Json::Value data;
+
+	string fileJson;
+	f->to_JSON(fileJson);
+	
+	data["type"] = "file_transfer";
+	data["fileJson"] = fileJson;
+	
+	Json::StyledWriter writer;
+	return writer.write(data);
 }

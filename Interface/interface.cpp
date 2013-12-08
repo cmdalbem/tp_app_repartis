@@ -108,7 +108,6 @@ void createFile()
 
 	vector<int> owners;
 	owners.push_back(server->getId());
-	server->newFile(title, content, owners);
 }
 
 void deleteFile()
@@ -119,7 +118,6 @@ void deleteFile()
 	cout << "id of the file: " << endl;
 	cin >> id;
 
-	server->deleteFile(id);
 }
 
 void readFile()
@@ -129,9 +127,6 @@ void readFile()
 	cout << "id of the file: " <<endl;
 	cin >> id;
 	
-	File* f = server->readFile(id); 
-	if (f)
-		cout << f->content << endl;
 }
 
 void modifyFile()
@@ -140,7 +135,6 @@ void modifyFile()
 	string title, content;
 	vector<int> owners;
 		
-	cout << "id of the file: " << endl;
 	cin >> id;
 	cout << "title of the file: " << endl;
 	cin >> title;
@@ -151,14 +145,11 @@ void modifyFile()
 	for (int i = 0; i < nowners; ++i)
 	{
 		int ownerTmp;
-		cout << "owner " << i << ": ";
 		cin >> ownerTmp;
 		owners.push_back(ownerTmp);
 	}
-	server->updateFile(id, title, content, owners);
 }
 
 void showFiles()
 {
-	server->listFiles();
 }

@@ -176,7 +176,7 @@ void Server::listFiles() {
 	manager.showAll();
 }
 
-void Server::reestart() {
+void Server::restart() {
 	// TODO: make it select only one machine to receive a given file from.
 	connector.broadcast(msg_reestart());
 

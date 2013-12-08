@@ -57,7 +57,7 @@ Server::~Server() {
 void Server::ping() {
 	cout << "Sending a ping" << endl;
 	Event event = Event(Ping,"Ping");
-	this->connector.senders[0].update(event);
+	this->connector.senders[0]->update(event);
 }
 
 //////////////////////

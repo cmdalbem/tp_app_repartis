@@ -5,12 +5,5 @@
 #include "Connector.h"
 #include "Server.h"
 
-void createFile();
+void connectToServer();
 
-void deleteFile();
-
-void readFile();
-
-void modifyFile();
-
-void showFiles();

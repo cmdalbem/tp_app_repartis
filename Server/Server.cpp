@@ -195,9 +195,9 @@ void Server::reestart() {
 }
 
 void Server::handleMessage(char *msg) {
-	cout<<"handleMessage: " << msg  <<endl;
+	cout<<"handleMessage: " << msg  << endl;
 	ping();
-
+	return;
 	const int n = 13;
 	const char *msgs[] = {"file_req","who_has","i_has","reestart",
 						  "del","alive?","alive!","new_file","update_file",

@@ -162,9 +162,9 @@ void Sender::getEvent(Event& event) {
 	event = eventQueue.front(); 
 
 	stringstream ss;
-	ss << "from 502"<<this->machineId << " to "<< this->portNo;
-	string id = ss.str();
-	event.setMessage("Message " + id + " " + event.getMessage());
+	//ss << "from 502"<<this->machineId << " to "<< this->portNo;
+	//string id = ss.str();
+	//event.setMessage("Message " + id + " " + event.getMessage());
 	cout << "Sending " << event.getMessage() << endl; 
 	eventQueue.pop_front();
 	pthread_mutex_unlock(&m);

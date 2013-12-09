@@ -17,7 +17,7 @@ class Server;
 
 class Connector {
 public:
-	void initialize(unsigned int nbMaxSenders,vector<string>& listIpAdress, unsigned int senderPortNo[]);
+	void initialize(unsigned int nbMaxSenders,vector<string>& listIpAdress, unsigned int senderPortNo[], Server *pserver);
 	Connector() {};
 	Connector(Server *pserver);
 	Connector(int machineId, unsigned int nbMaxSenders, vector<string>& listIpAdress, unsigned int senderPortNo[], unsigned int portNo, Server *pserver, vector<unsigned long long>& othersMachineId);

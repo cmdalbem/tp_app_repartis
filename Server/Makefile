@@ -1,7 +1,7 @@
 CC = g++
 FLAGS = -Wall -Wextra -I ../File
 LIBS = -lpthread
-INC = -I./ -I ../Sender
+INC = -I ./ -I ../Sender -I ../Interface
 
 # Seulement ajoutez ici le nom du nouveaux module qui tu a crée ;)
 OBJS = Receiver.o Server.o Connector.o ../File/pubsub.o ../File/FilesManager.o ../File/File.o ../Sender/Sender.o

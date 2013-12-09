@@ -6,6 +6,7 @@
 #include <cmath>
 #include <fstream>
 #include <sstream>
+#include <interface.h>
 
 #include <jsoncpp/json.h>
 
@@ -54,7 +55,7 @@ Server::Server(unsigned long long machineId, string ip, vector<string>& listIpAd
 } 
 
 void Server::initialize(vector<string> listIpAdress, unsigned int clientPortNo[]) {
-	this->connector.initialize(nbMaxClients, listIpAdress, clientPortNo);
+	this->connector.initialize(nbMaxClients, listIpAdress, clientPortNo,this);
 }
 Server::~Server() {	
 
@@ -305,7 +306,8 @@ bool Server::retrieveMessage(MessageStoreNode *ret, int src, string type) {
 
 void Server::handleMessage(char *msg) {
 	cout<<"handleMessage: " << msg  << endl;
-	return;
+	if (strcmp(msg,"")==0 || strcmp(msg," ")==0) 
+		return;
 
 	// TODO: identify who's the source of the message
 	string srcIp;

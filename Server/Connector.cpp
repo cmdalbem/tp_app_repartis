@@ -5,6 +5,7 @@
 #include "Connector.h"
 #include "Server.h"
 #include "Event.h"
+#include <interface.h>
 
 using namespace std;
 
@@ -12,12 +13,13 @@ Connector::Connector(Server *pserver) {
 	 receiver = Receiver(pserver); 
 }
 
-void Connector::initialize(unsigned int nbMaxSenders,vector<string>& listIpAdress, unsigned int senderPortNo[]) {
+void Connector::initialize(unsigned int nbMaxSenders,vector<string>& listIpAdress, unsigned int senderPortNo[], Server *pserver) {
 	bool allConnected;
 	bool change;
 	for (unsigned int i=0; i<nbMaxSenders-1;i++) {
 		this->listIp.insert(listIpAdress[i]);
 	}
+	int first=0;
 	while(1) {
 		allConnected = false;
 		change = false;
@@ -40,9 +42,10 @@ void Connector::initialize(unsigned int nbMaxSenders,vector<string>& listIpAdres
 		if (change) {
 			printf("Client(s) connected\n");
 		}
-		for (unsigned int i=0;i<nbMaxSenders-1;i++) {
-			send(this->othersMachineId[i],"yoho");
-		}
+		first++;
+		if (first == 1)
+			cout << "create a file" << endl;
+			interfaceMain((void*) pserver);
 	}
 
 }
@@ -81,8 +84,11 @@ void Connector::send(unsigned long long destId, string msg) {
 }
 
 void Connector::broadcast(string msg) {
-	//...
-	msg = msg;
+	std::vector<unsigned long long>::iterator it;
+	for (it = this->othersMachineId.begin(); it != this->othersMachineId.end(); ++it) {
+		Event e(BetweenServer, msg);
+		senders[*it]->threadedSender->update(e);
+	}
 }
 
 void Connector::addConnection(string ip) {

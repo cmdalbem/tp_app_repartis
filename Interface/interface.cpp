@@ -4,31 +4,24 @@
 
 #include <jsoncpp/json.h>
 #include "interface.h"
-#include <Sender.h>
-#include <ClientReceiver.h>
-#include <Event.h>
+#include <Connector.h>
+#include <Server.h>
 
 using namespace std;
 
-Sender sender(1000LL);
-ClientReceiver receiver;
-
-void initialize() {
-	receiver=ClientReceiver();
-	receiver.serverMain(1001, 5030);		
-	while (!sender.isConnected()) {
-		sender.SenderMain("127.0.0.1",5031);
-		sleep(1);
-	}
-}
-
-
-int main(void) {
+void *interfaceMain(void *context) {
 	int command;
-	initialize();
+	Server *server = (Server *) context;
 
 	bool exit = false;
+	sleep(10);
+	string title = "test1";
+	string content = "content_of_test1";
+	string msg=msg_new_file(title,content);
+	server->handleMessage(msg.c_str());
+	return (void *)0;
 
+	/*
 	while (not exit) {
 
 		cout << "(1) to create a file\n"
@@ -42,19 +35,19 @@ int main(void) {
 
 		switch(command) {
 			case 1:
-				createFile();
+				createFile(server);
 				break;
 			case 2:	
-				deleteFile();
+				deleteFile(server);
 				break;
 			case 3:
-				readFile();
+				readFile(server);
 				break;
 			case 4:
-				modifyFile();
+				modifyFile(server);
 				break;
 			case 5: 
-				showFiles();
+				showFiles(server);
 				break;
 			case 6: 
 				// EXIT
@@ -63,11 +56,12 @@ int main(void) {
 			default:
 				cout << "\"" << command << "\" is not a valid command, please try again." << endl;
 				break;
-		}	
+		}
 	}
+	*/	
 }
 
-void createFile()
+void createFile(Server *server)
 {
 	string title, content;
 
@@ -76,11 +70,10 @@ void createFile()
 	cout << "content: " << endl;
 	cin >> content;
 	string msg=msg_new_file(title,content);;
-	Event event=Event(CreateFile,msg);
-	sender.update(event);
+	server->handleMessage(msg.c_str());
 }
 
-void deleteFile()
+void deleteFile(Server *server)
 {
 	string title, content;
 	int id;
@@ -88,23 +81,21 @@ void deleteFile()
 	cout << "id of the file: " << endl;
 	cin >> id;
 	string msg=msg_delete_file(id);
-	Event event=Event(DeleteFile,msg);
-	sender.update(event);
+	server->handleMessage(msg.c_str());
 }
 
-void readFile()
+void readFile(Server *server)
 {
 	int id;
 
 	cout << "id of the file: " <<endl;
 	cin >> id;
 	string msg=msg_read_file(id);
-	Event event=Event(ReadFile,msg);
-	sender.update(event);
+	server->handleMessage(msg.c_str());
 
 }
 
-void modifyFile()
+void modifyFile(Server *server)
 {
 	int id;
 	string title, content;
@@ -116,15 +107,12 @@ void modifyFile()
 	cout << "content of the file: " << endl;
 	cin >> content;
 	string msg=msg_update_file(title,content,id);
-	Event event=Event(ModifyFile,msg);
-	sender.update(event);
+	server->handleMessage(msg.c_str());
 }
 
-void showFiles()
+void showFiles(Server *server)
 {
 	string msg="";
-	Event event=Event(ShowFiles,msg);
-	sender.update(event);
 }
 
 

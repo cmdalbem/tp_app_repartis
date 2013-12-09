@@ -3,6 +3,10 @@
 #include <string>
 #include <iostream>
 
+/*
+	Event is a wrapper containing the message we want to deliver to a special Sender 
+	Which will send it for us.
+*/
 enum Type {Ping,BetweenServer,CreateFile,DeleteFile,ReadFile,ModifyFile,ShowFiles};
 class Event {
 	public:

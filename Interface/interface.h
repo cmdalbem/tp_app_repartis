@@ -8,8 +8,6 @@ class Connector;
 using namespace std;
 void *interfaceMain(void* context);
 
-void connectToServer(Server *server);
-
 void createFile(Server *server);
 
 void deleteFile(Server *server);

@@ -76,6 +76,8 @@ void Receiver::process() {
 		this->server->handleMessage(buffer);
 	}
 }
+
+// wrapper to launch a thread
 void *Receiver::processWrapper(void *context) {
 	((Receiver *) context)->process();
 	return (void *) 0;

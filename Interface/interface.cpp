@@ -10,14 +10,14 @@
 using namespace std;
 
 void *interfaceMain(void *context) {
-	int command;
+	//int command;
 	Server *server = (Server *) context;
 
-	bool exit = false;
+	//bool exit = false;
 	sleep(10);
 	string title = "test1";
 	string content = "content_of_test1";
-	string msg=msg_new_file(title,content);
+	string msg(msg_new_file(title,content));
 	server->handleMessage(msg.c_str());
 	return (void *)0;
 

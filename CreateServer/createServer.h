@@ -5,5 +5,6 @@
 #include "Connector.h"
 #include "Server.h"
 
+/* creation of a server */
 void connectToServer();
 

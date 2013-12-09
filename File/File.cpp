@@ -1,6 +1,7 @@
 #include "File.h"
 #include <sstream>
 
+/* creating a serializable version of the file */
 void File::to_JSON(string& output_data) 
 {
 	Json::Value data;
@@ -16,6 +17,8 @@ void File::to_JSON(string& output_data)
 	Json::StyledWriter writer;
 	output_data = writer.write(data);
 }
+
+/* recreating the file from its serializable version */
 int File::parse_JSON(string json_data)
 {
 	Json::Reader reader;
@@ -32,7 +35,7 @@ int File::parse_JSON(string json_data)
 
 	return 0;
 }
-
+/*Debug function in order to see the content of a file */
 string File::show() {
 	string res;
 

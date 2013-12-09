@@ -15,8 +15,8 @@
 #include <pthread.h>
 
 /* 
-   A simple server in the internet domain using TCP
-   The port number is passed as an argument 
+	The Receiver is waiting for Sender to connect to him in order to process their request
+	The requests are processed in the Server interface
 */
 class Server;
 class Receiver {
@@ -25,12 +25,13 @@ public:
 	
 	Receiver() {}
 	Receiver(Server *pserver){ this->server = pserver;}
-		 
+	// the listening par of the Receiver, which create new threads for each connection
 	void serverMain(int machineId, int portNo);
 	// everything needed to run a server 
 	void *run(); 
 
 private:
+	// the server
 	Server *server;
 	// defines the behaviour of the server 
 	static void *processWrapper(void *context);

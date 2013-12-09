@@ -5,6 +5,7 @@ using namespace std;
 // simple constructor with default value
 Sender::Sender(unsigned long long id)  : threadedSender(NULL), connected(false), machineId(id){ 
 	
+	/* init of the mutexes */
 	pthread_mutex_init(&m, NULL);
 	pthread_cond_init(&c, NULL);
 };
@@ -69,7 +70,6 @@ void Sender::writeMessage(char* buffer) {
 	if (tmp < 0) { 
 		// Do not exit
 		perror("ERROR writing to socket");
-		//error("ERROR writing to socket");
 	}
 }
 
@@ -145,6 +145,8 @@ int Sender::SenderMain(string hostName,int portNo) {
 void Sender::update(Event& what) {
 	pthread_mutex_lock(&m);
 	bool wasEmpty = eventQueue.empty();
+	/* we push the event */
+	/* If the queue was empty we signa the event to the Sender */
 	this->eventQueue.push_back(what);
 	if (wasEmpty) {
 		pthread_cond_signal(&c);

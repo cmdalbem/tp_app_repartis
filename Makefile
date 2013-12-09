@@ -9,9 +9,6 @@ all:
 		$(MAKE) -C CreateServer
 		$(MAKE) -C Server
 
-test: test.cpp test.h
-		$(CC) $(FLAGS) -c $< -o $@ $(FLAGS) $(LIBS) 
-
 clean:
 		$(MAKE) -C File clean 
 		$(MAKE) -C Sender clean

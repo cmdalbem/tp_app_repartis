@@ -98,7 +98,7 @@ public:
 	string getIP() { return ip; }
 	int getId() { return machineId; }
 
-	void handleMessage(char *msg);
+	void handleMessage(const char *msg);
 	void ping();
 
 	void configure();

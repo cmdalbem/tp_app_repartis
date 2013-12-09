@@ -202,7 +202,7 @@ void *readFile(void* arguments) {
 
 void *listFiles(void* arg) {
 	// Parse arguments
-	Server *me = (Server*) arg;
+	//Server *me = (Server*) arg;
 
 	// TODO: how to retrieve a full list of files through servers?
 
@@ -304,14 +304,14 @@ bool Server::retrieveMessage(MessageStoreNode *ret, int src, string type) {
 // Message Handling //
 //////////////////////
 
-void Server::handleMessage(char *msg) {
+void Server::handleMessage(const char *msg) {
 	cout<<"handleMessage: " << msg  << endl;
 	if (strcmp(msg,"")==0 || strcmp(msg," ")==0) 
 		return;
 
 	// TODO: identify who's the source of the message
 	string srcIp;
-	int srcId;
+	unsigned long long srcId;
 
 	Json::Reader reader;
 	Json::Value data;
@@ -581,6 +581,7 @@ string Server::msg_add(string fileJson) {
 	data["fileJson"] = fileJson;
 	
 	Json::StyledWriter writer;
+	return writer.write(data);
 }
 string Server::msg_add(File* f) {
 	Json::Value data;
@@ -618,6 +619,7 @@ string Server::msg_file_transfer(string fileJson) {
 	data["fileJson"] = fileJson;
 	
 	Json::StyledWriter writer;
+	return writer.write(data);
 }
 
 string Server::msg_file_transfer(File* f) {

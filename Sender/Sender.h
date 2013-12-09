@@ -15,6 +15,9 @@
 #include <Event.h>
 #include <pthread.h>
 
+/*
+	Each Server connect a Sender to each other Server and communicate with them with it.
+*/
 
 class Sender : public Subscriber {
 public:
@@ -29,8 +32,11 @@ public:
 	// everything needed to run a server
 	void *run(); 
 
+	/* the Sender is given an Event to handle */
 	void update(Event& what); 
+	/* the Sender check if he has to take care of an event */
 	void getEvent(Event& event); 
+	/* the Sender handle the communication of the message in the Event */
 	void treatEvent(Event& event);
 
 	// object used in the thread
@@ -66,6 +72,7 @@ private:
 	// pointer to the computer hosting the server
 	struct hostent *server;
 
+	/* mutex and cond used in the Event waiting queue */
 	list<Event> eventQueue;
 	pthread_mutex_t m;
 	pthread_cond_t c

@@ -10,19 +10,18 @@
 using namespace std;
 
 void *interfaceMain(void *context) {
-	//int command;
+	int command;
 	Server *server = (Server *) context;
 
-	//bool exit = false;
+	bool exit;
 	sleep(10);
 	string title = "test1";
 	string content = "content_of_test1";
 	string msg(msg_new_file(title,content));
 	server->handleMessage(msg.c_str());
-	return (void *)0;
+	return (void*)0;
 
-	/*
-	while (not exit) {
+	do {
 
 		cout << "(1) to create a file\n"
 			"(2) to delete a file\n"
@@ -57,8 +56,7 @@ void *interfaceMain(void *context) {
 				cout << "\"" << command << "\" is not a valid command, please try again." << endl;
 				break;
 		}
-	}
-	*/	
+	}while(!exit);
 }
 
 void createFile(Server *server)
@@ -115,6 +113,13 @@ void showFiles(Server *server)
 	string msg="";
 }
 
+
+////////////////////////////////////////////
+// Helper functions for creating messages //
+////////////////////////////////////////////
+
+// Returns a string in JSON format for each kind of message, with the arguments
+//   properly encoded.
 
 string msg_new_file(string title, string content) {
 	Json::Value data;

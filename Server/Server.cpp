@@ -48,7 +48,7 @@ Server::Server(unsigned long long machineId, string ip, vector<string>& listIpAd
 	configure();
 	this->ip = ip;
 	this->machineId = machineId;
-	// do the complex server/client initializations here 
+	// Initialize Connector, which will initialize all Senders and Receivers necessary
 	cout << "entering Connector" << endl;
 	this->connector = Connector(machineId, nbMaxClients, listIpAdress, clientPortNo, portNo, this, othersMachineId);
 	cout << "quitting Server" << endl;
@@ -70,18 +70,19 @@ void Server::ping() {
 // Files Management //
 //////////////////////
 
-// returns the integer concatenation of the machineId with the lastFileId
+// Returns the integer concatenation of the machineId with the lastFileId
+// If machineId is '127001' and lastFileId is '666', then newFileId => 127001666
 int Server::getNewFileId()
 {
 	#define COUNT_DIGITS(x) ((int) log10(x)+1)
 
-	// If machineId is '127001' and lastFileId is '666', then newFileId => 127001666
 	int newFileId = machineId * pow(10,COUNT_DIGITS(lastFileId)) + lastFileId;
 	
 	return newFileId;
 }
 
 void *newFile(void *arguments) {
+	// Parse arguments
 	struct newFile_args *args = (struct newFile_args *) arguments;
 	Server *me = args->server;
 	string title = args->title;
@@ -90,7 +91,7 @@ void *newFile(void *arguments) {
 
 	MessageStoreNode buffer;
 
-	// Create new file
+	// Build new file
 	File* f = new File(me->getNewFileId(), title, content, owners);
 	me->incrementLastFileId();
 	f->owners.push_back(me->getId()); // adds myself to list of owners
@@ -98,13 +99,13 @@ void *newFile(void *arguments) {
 	// Finds out who is alive
 	me->connector.broadcast(me->msg_aliveQ());
 	
-	// Collects K ids of who answers
+	// Collects K ids of who replies
 	for (unsigned int i = 0; i < me->nbMaxErrors; ++i) {
 		while(!me->retrieveMessage(&buffer,"alive!"));
 		f->owners.push_back(buffer.src);
 	}
 	
-	// Converts file to JSON, now if a correct list of owners
+	// Converts file to JSON, now with the list of K+1 owners
 	string fileMsg = me->msg_add(f);
 	
 	// Sends the file to those guys
@@ -148,7 +149,7 @@ void *updateFile(void *arguments) {
 }
 
 void *deleteFile(void* arguments) {
-	// Parse arguments
+	// Parse argumeasents
 	struct file_args *args = (struct file_args *)arguments;
 	Server *me = args->server;
 	int file_id = args->file_id;
@@ -182,10 +183,10 @@ void *readFile(void* arguments) {
 		stringstream ss;
 		ss << file_id;
 		
-		// Waits until someone answers
+		// Waits until someone reply
 		while(!me->retrieveMessage(&buffer,string("i_has"),ss.str()));
 
-		// Asks the file for the first who answered
+		// Asks the file for the first who replied
 		me->connector.send(buffer.src, me->msg_file_req(file_id));
 
 		// Receive the file
@@ -215,8 +216,6 @@ void *restart(void* arg) {
 	// Parse arguments
 	Server *me = (Server*) arg;
 
-	// OPTIMIZE: make it select only one machine to receive a given file from.
-	
 	// Tells everyone that you're coming back
 	me->connector.broadcast(me->msg_restart());
 
@@ -237,11 +236,15 @@ void *restart(void* arg) {
 // Message Buffer managing //
 /////////////////////////////
 
+// Pushes a message to msgsBuffer with empty content
 void Server::pushMessage(int src, string msg) {
 	pushMessage(src,msg,"");
 }
 
+// Pushes a message to msgsBuffer
 void Server::pushMessage(int src, string msg, string content) {
+	// The mutex makes sure we are not reading and writing at the same time.
+	// It can really happen, since each running algorithm is in fact a thread.
 	pthread_mutex_lock(&msgsBufferMutex);
 		bool wasEmpty = msgsBuffer.empty();
 		msgsBuffer.push_back({src,msg,content});
@@ -252,6 +255,7 @@ void Server::pushMessage(int src, string msg, string content) {
 	pthread_mutex_unlock(&msgsBufferMutex);
 }
 
+// Searches for a message with the desired type. If found, pop it and returns it.
 bool Server::retrieveMessage(MessageStoreNode *ret, string type) {
 	pthread_mutex_lock(&msgsBufferMutex);
 		if(msgsBuffer.empty()) {
@@ -271,8 +275,13 @@ bool Server::retrieveMessage(MessageStoreNode *ret, string type) {
 	return false;
 }
 
+// Searches for a message with the desired type and desired content. If found, pop it and returns it.
 bool Server::retrieveMessage(MessageStoreNode *ret, string type, string content) {
 	pthread_mutex_lock(&msgsBufferMutex);
+		if(msgsBuffer.empty()) {
+			// If queue is empty then releases the mutex and sleep until it's not anymore
+			pthread_cond_wait(&msgsBufferCond,&msgsBufferMutex);
+		}
 		for (unsigned int i = 0; i < msgsBuffer.size(); ++i) {
 			if (msgsBuffer[i].type.compare(type) == 0 && msgsBuffer[i].content.compare(content)==0) {
 				*ret = msgsBuffer[i];
@@ -285,8 +294,13 @@ bool Server::retrieveMessage(MessageStoreNode *ret, string type, string content)
 	return false;
 }
 
+// Searches for a message with the desired type and desired source. If found, pop it and returns it.
 bool Server::retrieveMessage(MessageStoreNode *ret, int src, string type) {
 	pthread_mutex_lock(&msgsBufferMutex);
+		if(msgsBuffer.empty()) {
+			// If queue is empty then releases the mutex and sleep until it's not anymore
+			pthread_cond_wait(&msgsBufferCond,&msgsBufferMutex);
+		}
 		for (unsigned int i = 0; i < msgsBuffer.size(); ++i) {
 			if (msgsBuffer[i].type.compare(type) == 0 && msgsBuffer[i].src==src) {
 				*ret = msgsBuffer[i];
@@ -304,6 +318,14 @@ bool Server::retrieveMessage(MessageStoreNode *ret, int src, string type) {
 // Message Handling //
 //////////////////////
 
+// Parsse and handles messages received by the Server. They can be sent by other Servers or
+//   by an Interface (Client).
+//   - Messages from the Interface launches threads that will execute the protocols for creating,
+//     reading, ... files.
+//   - Some messages sent by Servers my require immediate action (like "alive?", which just
+//     replies "alive!"). Others (like "alive!") will be buffered in msgsBuffer, which stores
+//     messages to be handled by the protocols' threads.
+// For more information on the meaning of each message please refer to the Documentation.
 void Server::handleMessage(const char *msg) {
 	cout<<"handleMessage: " << msg  << endl;
 	if (strcmp(msg,"")==0 || strcmp(msg," ")==0) 
@@ -330,8 +352,8 @@ void Server::handleMessage(const char *msg) {
 	string types[] = {"file_req","who_has","i_has","restart",
 					  "del","alive?","alive!","add","new_file","update_file",
 					  "delete_file","read_file","file_transfer"};
-	int whichType=-1;
 	// Compare then all. If found correct type, puts it in "whichType"
+	int whichType=-1;
 	for (int i = 0; i < n; ++i) {
 		if (types[i].compare(msgType) == 0) {
 			whichType = i;
@@ -341,8 +363,9 @@ void Server::handleMessage(const char *msg) {
 
 	cout << "Identified msg as being of type: " << whichType << endl;
 
-	// Now handle each one properly
+	// Now handle each type properly
 	switch(whichType) {
+
 		////////////////////////////
 		// SERVER/SERVER Messages //
 		////////////////////////////
@@ -361,7 +384,7 @@ void Server::handleMessage(const char *msg) {
 		case 1:
 			// who_has
 			{
-				// 	Check if I have this file locally. If yes, answers with a "i_has" msg.
+				// 	Check if I have this file locally. If yes, replies with a "i_has" msg.
 				int file_id = data["file_id"].asInt();
 				if(manager.read(file_id))
 					connector.send(srcId, msg_i_has(file_id));
@@ -440,11 +463,12 @@ void Server::handleMessage(const char *msg) {
 		case 8: 
 			// new_file
 			{
+				cout << "received message to create a new file!" << endl;
 				vector<unsigned long long int> owners;
 				for (unsigned int i = 0; i < data["owners"].size(); ++i)
 					owners.push_back(data["owners"][i].asInt());
 				
-				// Launch thread that will run the algorithm
+				// Launch thread that will run the protocol algorithm
 				pthread_t t;
 				struct newFile_args args = {
 					this,
@@ -465,7 +489,7 @@ void Server::handleMessage(const char *msg) {
 				for (unsigned int i = 0; i < data["owners"].size(); ++i)
 					owners.push_back(data["owners"][i].asInt());
 
-				// Launch thread that will run the algorithm
+				// Launch thread that will run the protocol algorithm
 				pthread_t t;
 				struct updateFile_args args = {
 					this,
@@ -481,7 +505,7 @@ void Server::handleMessage(const char *msg) {
 		case 10:
 			// delete_file
 			{
-				// Launch thread that will run the algorithm
+				// Launch thread that will run the protocol algorithm
 				pthread_t t;
 				struct file_args args = {
 					this,
@@ -494,16 +518,13 @@ void Server::handleMessage(const char *msg) {
 		case 11:
 			// read_file
 			{
+				// Launch thread that will run the protocol algorithm
 				pthread_t t;
 				struct file_args args = {
 					this,
 					data["file_id"].asInt()
 				};
 				pthread_create(&t, NULL, &readFile, (void*)&args);
-
-				// TODO: receive the file...
-				
-				//File* f = readFile(data["file_id"].asInt());
 			}
 			break;
 
@@ -514,8 +535,7 @@ void Server::handleMessage(const char *msg) {
 
 		case 12:
 			// file_transfer
-			// Push into the msgs buffer
-			// TODO: what to do when receiving a file?
+			// Push into the msgs buffer for later handling
 			pushMessage(srcId, data["type"].asString(), data["fileJson"].asString());
 			break;
 
@@ -529,6 +549,9 @@ void Server::handleMessage(const char *msg) {
 ////////////////////////////////////////////
 // Helper functions for creating messages //
 ////////////////////////////////////////////
+
+// Returns a string in JSON format for each kind of message, with the arguments
+//   properly encoded.
 
 string Server::msg_file_req(int file_id) {
 	Json::Value data;

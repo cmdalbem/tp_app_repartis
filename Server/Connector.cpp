@@ -71,6 +71,9 @@ Connector::~Connector() {
 
 }
 
+// Sends the message 'msg' to the machine identified by 'destId'.
+// In low-level, it registers an event with the msg in the pub/sub system to be
+//   catched by a sender thread.
 void Connector::send(unsigned long long destId, string msg) {
 	std::vector<unsigned long long>::iterator it;
 	for ( it = this->othersMachineId.begin(); it != this->othersMachineId.end(); ++it) { 
@@ -83,6 +86,8 @@ void Connector::send(unsigned long long destId, string msg) {
 	cout << destId << " is not an available id" << endl;
 }
 
+// Sends the message 'msg' to all servers registered.
+// In low-level, it registers an event with the msg for each Sender registered.
 void Connector::broadcast(string msg) {
 	std::vector<unsigned long long>::iterator it;
 	for (it = this->othersMachineId.begin(); it != this->othersMachineId.end(); ++it) {
@@ -93,5 +98,5 @@ void Connector::broadcast(string msg) {
 
 void Connector::addConnection(string ip) {
 	//...
-	ip = ip;	
+	ip = ip;
 }

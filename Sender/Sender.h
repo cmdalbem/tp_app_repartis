@@ -19,7 +19,7 @@
 class Sender : public Subscriber {
 public:
 	// simple constructor with default value
-	Sender(int id, string ip);
+	Sender(unsigned long long id);
 	// simple destructor
 	~Sender(); 
 	// return true if the Sender is connected, false otherwise
@@ -56,7 +56,7 @@ private:
 	// indicates wheter the Sender is connected or not
 	bool connected;
 	// id of the machine using the Sender
-	int machineId;
+	unsigned long long  machineId;
 	// defines the file descriptor of the socket
 	int sockfd;
 	// defines the port number 
@@ -67,7 +67,6 @@ private:
 	struct hostent *server;
 
 	list<Event> eventQueue;
-	string ip;
 	pthread_mutex_t m;
 	pthread_cond_t c
 	;

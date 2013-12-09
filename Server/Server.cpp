@@ -42,23 +42,27 @@ void Server::configure() {
 } 
 
 
-Server::Server(int machineId, string ip, vector<string> listIpAdress, unsigned int clientPortNo[], unsigned int portNo) {
+Server::Server(unsigned long long machineId, string ip, vector<string>& listIpAdress, unsigned int clientPortNo[], unsigned int portNo, vector<unsigned long long>& othersMachineId) {
 	cout << "entering Server" << endl;
 	configure();
 	this->ip = ip;
 	this->machineId = machineId;
 	// do the complex server/client initializations here 
-	this->connector = Connector(machineId, nbMaxClients, listIpAdress, clientPortNo, portNo, this);
-	this->connector.initialize(nbMaxClients, listIpAdress, clientPortNo);
+	cout << "entering Connector" << endl;
+	this->connector = Connector(machineId, nbMaxClients, listIpAdress, clientPortNo, portNo, this, othersMachineId);
 	cout << "quitting Server" << endl;
 } 
 
+void Server::initialize(vector<string> listIpAdress, unsigned int clientPortNo[]) {
+	this->connector.initialize(nbMaxClients, listIpAdress, clientPortNo);
+}
 Server::~Server() {	
 
 }
 
 void Server::ping() {
-	this->connector.send(0,"youhou server 0");
+	cout << "ping not implem" << endl;
+	return;
 }
 
 //////////////////////
@@ -81,7 +85,7 @@ void *newFile(void *arguments) {
 	Server *me = args->server;
 	string title = args->title;
 	string content = args->content;
-	vector<int> owners = args->owners;
+	vector<unsigned long long int> owners = args->owners;
 
 	MessageStoreNode buffer;
 
@@ -119,7 +123,7 @@ void *updateFile(void *arguments) {
 	int file_id = args->file_id;
 	string title = args->title;
 	string content = args->content;
-	vector<int> owners = args->owners;
+	vector<unsigned long long int> owners = args->owners;
 
 	// Asks who has the file
 	me->connector.broadcast(me->msg_who_has(file_id));
@@ -301,7 +305,6 @@ bool Server::retrieveMessage(MessageStoreNode *ret, int src, string type) {
 
 void Server::handleMessage(char *msg) {
 	cout<<"handleMessage: " << msg  << endl;
-	ping();
 	return;
 
 	// TODO: identify who's the source of the message
@@ -435,7 +438,7 @@ void Server::handleMessage(char *msg) {
 		case 8: 
 			// new_file
 			{
-				vector<int> owners;
+				vector<unsigned long long int> owners;
 				for (unsigned int i = 0; i < data["owners"].size(); ++i)
 					owners.push_back(data["owners"][i].asInt());
 				
@@ -456,7 +459,7 @@ void Server::handleMessage(char *msg) {
 		case 9:
 			// update_file
 			{
-				vector<int> owners;
+				vector<unsigned long long int> owners;
 				for (unsigned int i = 0; i < data["owners"].size(); ++i)
 					owners.push_back(data["owners"][i].asInt());
 

@@ -88,11 +88,10 @@ void *Receiver::run() {
 	// while true listen. Good student		  	
 	while(1) {
 		// listen to the socket
-		cout<<"Waiting for a connection"<<endl;
 		this->connectServer();
 		// new thread to accept other connections	
-		cout << 1 << endl;
 		pthread_t t;
+		/*
 		string ip= inet_ntoa(this->cli_addr.sin_addr);
 		int port= this->cli_addr.sin_port;
 		cout << ip << endl;
@@ -105,8 +104,10 @@ void *Receiver::run() {
 				
 			}
 		}
+		*/
 		Receiver *threadedReceiver = new Receiver(*this);
 		pthread_create(&t, NULL, &Receiver::processWrapper, threadedReceiver);
+		cout << "Created the receiver" <<endl;
 	}
 	close(this->sockfd);
 	close(this->newsockfd);

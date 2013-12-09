@@ -10,7 +10,7 @@
 
 using namespace std;
 
-Sender sender(1000, "localhost");
+Sender sender(1000LL);
 ClientReceiver receiver;
 
 void initialize() {

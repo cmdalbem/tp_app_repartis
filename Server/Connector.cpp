@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 #include "Connector.h"
 #include "Server.h"
@@ -11,7 +12,7 @@ Connector::Connector(Server *pserver) {
 	 receiver = Receiver(pserver); 
 }
 
-void Connector::initialize(unsigned int nbMaxSenders,vector<string> listIpAdress, unsigned int senderPortNo[]) {
+void Connector::initialize(unsigned int nbMaxSenders,vector<string>& listIpAdress, unsigned int senderPortNo[]) {
 	bool allConnected;
 	bool change;
 	for (unsigned int i=0; i<nbMaxSenders-1;i++) {
@@ -23,9 +24,9 @@ void Connector::initialize(unsigned int nbMaxSenders,vector<string> listIpAdress
 		while (! allConnected) {
 			allConnected = true;
 			for (unsigned int i = 0; i < nbMaxSenders-1; i++) {
-				if (! senders[i]->isConnected()) {
+				if (! senders[this->othersMachineId[i]]->isConnected()) {
 					cout << "connecting a sender" << endl;
-					senders[i]->SenderMain(listIpAdress[i], senderPortNo[i]);	
+					senders[this->othersMachineId[i]]->SenderMain(listIpAdress[i], senderPortNo[i]);	
 					allConnected = false;
 				}
 			}
@@ -39,21 +40,26 @@ void Connector::initialize(unsigned int nbMaxSenders,vector<string> listIpAdress
 		if (change) {
 			printf("Client(s) connected\n");
 		}
+		for (unsigned int i=0;i<nbMaxSenders-1;i++) {
+			send(this->othersMachineId[i],"yoho");
+		}
 	}
 
 }
 
-Connector::Connector(int machineId, unsigned int nbMaxSenders, vector<string> listIpAdress, unsigned int senderPortNo[], unsigned int portNo, Server *pserver) {
+Connector::Connector(int machineId, unsigned int nbMaxSenders, vector<string>& listIpAdress, unsigned int senderPortNo[], unsigned int portNo, Server *pserver, vector<unsigned long long>& othersMachineId) {
 	this->machineId = machineId;
-	this->firstConnectionComplete=false;
-
+	for (int i=0; i < othersMachineId.size(); ++i) {
+		this->othersMachineId.push_back(othersMachineId[i]);
+	}
+	
 	receiver=Receiver(pserver);
 	receiver.serverMain(machineId, portNo);		
 	printf("Server launched\n");
 
 	for (unsigned int i = 0; i < nbMaxSenders-1; ++i) {
 		cout << i+1 << " senders registered of " << nbMaxSenders -1 << endl;
-		this->subscribe(new Sender(machineId,listIpAdress[machineId]));
+		this->subscribe(new Sender(machineId),othersMachineId[i]);
 	}	
 	cout << "the " << nbMaxSenders << " have been registered" << endl;
 }
@@ -62,16 +68,16 @@ Connector::~Connector() {
 
 }
 
-void Connector::send(int destId, string msg) {
-	int offset;
-	offset = (machineId < destId) ? -1 : 0;
-	if (destId < senders.size()) {
-		Event e(BetweenServer, msg);
-		senders[destId + offset]->threadedSender->update(e);
-	} else {
-		fprintf(stderr, "Envoie à ID inexistant : %i\n", destId);
-		exit(0);
+void Connector::send(unsigned long long destId, string msg) {
+	std::vector<unsigned long long>::iterator it;
+	for ( it = this->othersMachineId.begin(); it != this->othersMachineId.end(); ++it) { 
+		if (*it == destId) {
+			Event e(BetweenServer, msg);
+			senders[destId]->threadedSender->update(e);
+			return;
+		}
 	}
+	cout << destId << " is not an available id" << endl;
 }
 
 void Connector::broadcast(string msg) {

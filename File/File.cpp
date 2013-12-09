@@ -10,7 +10,7 @@ void File::to_JSON(string& output_data)
 
 	Json::Value ownersNode;
 	for (unsigned int i = 0; i < owners.size(); ++i)
-		ownersNode.append(owners[i]);
+		ownersNode.append((unsigned int) owners[i]);
 	data["owners"] = ownersNode;
 	
 	Json::StyledWriter writer;

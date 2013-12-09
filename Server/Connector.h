@@ -17,32 +17,30 @@ class Server;
 
 class Connector {
 public:
-	void initialize(unsigned int nbMaxSenders,vector<string> listIpAdress, unsigned int senderPortNo[]);
+	void initialize(unsigned int nbMaxSenders,vector<string>& listIpAdress, unsigned int senderPortNo[]);
 	Connector() {};
 	Connector(Server *pserver);
-	Connector(int machineId, unsigned int nbMaxSenders, vector<string> listIpAdress, unsigned int senderPortNo[], unsigned int portNo, Server *pserver);
+	Connector(int machineId, unsigned int nbMaxSenders, vector<string>& listIpAdress, unsigned int senderPortNo[], unsigned int portNo, Server *pserver, vector<unsigned long long>& othersMachineId);
 	~Connector();
 
-	void send(int id, string msg);
+	void send(unsigned long long id, string msg);
 	void broadcast(string msg);
 	
 	void addConnection(string ip);
-	void subscribe(Sender* s) { 
-		static int nb=0;
+	void subscribe(Sender* s, int nb) { 
 		senders.insert(std::pair<int,Sender*>(nb,s));
-		 nb++;
 	}
 	void unsubscribe(int id) { senders.erase(id); }
 	int getMachineId() {
 		return machineId;
 	}
 	bool isBlacklisted(string ip) {
-		return (this->listIp.count(ip) || !this->firstConnectionComplete);
+		return (this->listIp.count(ip));
 	}
 private:
-	bool firstConnectionComplete;
 	set<string> listIp;
-	int machineId;
+	unsigned long long machineId;
+	vector<unsigned long long> othersMachineId;
 	map<int,Sender *> senders;
 
 	Receiver receiver;

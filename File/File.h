@@ -17,7 +17,7 @@ public:
 		parse_JSON(json);
 	}
 
-	File(int id, string title, string content, vector<int> owners)
+	File(int id, string title, string content, vector<unsigned long long int> owners)
 	{
 		this->id = id;
 		this->title = title;
@@ -29,7 +29,7 @@ public:
 	int id;
 	string title;
 	string content;
-	vector<int> owners;
+	vector<unsigned long long int> owners;
 
 	/* debug */
 	string show();

@@ -15,7 +15,7 @@ struct newFile_args {
 	Server *server;
 	string title;
 	string content;
-	vector<int> owners;
+	vector<unsigned long long> owners;
 };
 
 struct updateFile_args {
@@ -23,7 +23,7 @@ struct updateFile_args {
 	int file_id;
 	string title;
 	string content;
-	vector<int> owners;
+	vector<unsigned long long> owners;
 };
 
 struct file_args {
@@ -52,7 +52,8 @@ class Server {
 public:
 
 	Server(); 
-	Server(int machineId, string ip, vector<string> listIpAdress, unsigned int clientPortNo[], unsigned int portNo); 
+	Server(unsigned long long machineId, string ip, vector<string>& listIpAdress, unsigned int clientPortNo[], unsigned int portNo, vector<unsigned long long>& othersMachineId); 
+	void initialize(vector<string> listIpAdress, unsigned int clientPortNo[]);
 	~Server();
 
 	// Lots of these functions must be public because they are accessed by the
